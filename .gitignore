@@ -1,0 +1,51 @@
+## Build artifacts
+bin/
+obj/
+out/
+artifacts/
+
+## User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Visual Studio
+.vs/
+*.vcxproj.user
+*.rsuser
+
+## ASP.NET Core
+appsettings.Development.json
+appsettings.Local.json
+appsettings.*.json
+
+## Logs
+*.log
+
+## Packages
+*.nupkg
+*.snupkg
+packages/
+*.nuget.props
+*.nuget.targets
+
+## Publish output
+wwwroot/dist/
+wwwroot/lib/
+
+## Rider / JetBrains
+.idea/
+*.sln.iml
+
+## OS files
+.DS_Store
+Thumbs.db
+
+## Node (if using frontend)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+## Azure
+PublishProfiles/

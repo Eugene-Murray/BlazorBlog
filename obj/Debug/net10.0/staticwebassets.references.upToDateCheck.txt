@@ -1,8 +1,0 @@
-C:\Users\eugen\source\repos\Hacking\DotNet\blazor\BlazorBlog\BlazorBlog\BlazorBlog.Client\obj\Debug\net10.0\staticwebassets.build.json
-C:\Users\eugen\source\repos\Hacking\DotNet\blazor\BlazorBlog\BlazorBlog\BlazorBlog.Client\obj\Debug\net10.0\staticwebassets.build.json
-C:\Users\eugen\source\repos\Hacking\DotNet\blazor\BlazorBlog\BlazorBlog\BlazorBlog.Client\obj\Debug\net10.0\staticwebassets.build.json
-C:\Users\eugen\source\repos\Hacking\DotNet\blazor\BlazorBlog\BlazorBlog\BlazorBlog.Client\obj\Debug\net10.0\staticwebassets.build.json
-C:\Users\eugen\source\repos\Hacking\DotNet\blazor\BlazorBlog\BlazorBlog\BlazorBlog.Client\obj\Debug\net10.0\staticwebassets.build.json
-C:\Users\eugen\source\repos\Hacking\DotNet\blazor\BlazorBlog\BlazorBlog\BlazorBlog.Client\obj\Debug\net10.0\staticwebassets.build.json
-C:\Users\eugen\source\repos\Hacking\DotNet\blazor\BlazorBlog\BlazorBlog\BlazorBlog.Client\obj\Debug\net10.0\staticwebassets.build.json
-C:\Users\eugen\source\repos\Hacking\DotNet\blazor\BlazorBlog\BlazorBlog\BlazorBlog.Client\obj\Debug\net10.0\staticwebassets.build.json

@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="BlazorBlog/BlazorBlog.Client/BlazorBlog.Client.csproj" />
+  <Project Path="BlazorBlog/BlazorBlog/BlazorBlog.csproj" />
+  <Project Path="BlazorGallery/BlazorGallery.Client/BlazorGallery.Client.csproj" />
+  <Project Path="BlazorGallery/BlazorGallery/BlazorGallery.csproj" />
+</Solution>
