@@ -1,6 +1,20 @@
 <Solution>
-  <Project Path="BlazorBlog/BlazorBlog.Client/BlazorBlog.Client.csproj" />
-  <Project Path="BlazorBlog/BlazorBlog/BlazorBlog.csproj" />
-  <Project Path="BlazorGallery/BlazorGallery.Client/BlazorGallery.Client.csproj" />
-  <Project Path="BlazorGallery/BlazorGallery/BlazorGallery.csproj" />
+  <Folder Name="/Admin/">
+    <Project Path="EM.CMS.Admin/EM.CMS.Admin.Client/EM.CMS.Admin.Client.csproj" />
+    <Project Path="EM.CMS.Admin/EM.CMS.Admin/EM.CMS.Admin.csproj" />
+    <Project Path="EM.CMS.AppHost/EM.CMS.AppHost.csproj" Id="31412eeb-86b9-477b-bdb4-454737dc9180" />
+    <Project Path="EM.CMS.ServiceDefaults/EM.CMS.ServiceDefaults.csproj" />
+  </Folder>
+  <Folder Name="/InvestingBlog/">
+    <Project Path="BlazorBlog/BlazorBlog.Client/BlazorBlog.Client.csproj" />
+    <Project Path="BlazorBlog/BlazorBlog/BlazorBlog.csproj" />
+  </Folder>
+  <Folder Name="/TravelGalleryBlog/">
+    <Project Path="BlazorGallery/BlazorGallery.Client/BlazorGallery.Client.csproj" />
+    <Project Path="BlazorGallery/BlazorGallery/BlazorGallery.csproj" />
+  </Folder>
+  <Project Path="EM.CMS.Common/EM.CMS.Common.csproj" />
+  <Project Path="EM.CMS.DataAccess/EM.CMS.DataAccess.csproj" />
+  <Project Path="EM.CMS.Entities/EM.CMS.Entities.csproj" />
+  <Project Path="EM.CMS.Services/EM.CMS.Services.csproj" />
 </Solution>
