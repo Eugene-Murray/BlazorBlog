@@ -1,0 +1,347 @@
+@page "/blog/create"
+@page "/blog/edit/{id:int}"
+@using BlazorBlog.Data
+@using BlazorBlog.Services
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Authorization
+@using System.Security.Claims
+@using System.ComponentModel.DataAnnotations
+@inject BlogService BlogService
+@inject NavigationManager NavigationManager
+@inject UserManager<ApplicationUser> UserManager
+@inject AdminClaimsService AdminClaimsService
+@inject IJSRuntime JSRuntime
+@attribute [Authorize]
+@rendermode InteractiveServer
+
+<PageTitle>@(IsEdit ? "Edit Post" : "Create New Post")</PageTitle>
+
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/blog">Blog</a></li>
+            <li class="breadcrumb-item active" aria-current="page">@(IsEdit ? "Edit Post" : "Create Post")</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">@(IsEdit ? "Edit Blog Post" : "Create New Blog Post")</h3>
+                </div>
+                <div class="card-body">
+                    @if (!IsAdmin)
+                    {
+                        <div class="alert alert-danger">
+                            <span class="bi bi-exclamation-triangle me-2"></span>
+                            You don't have permission to @(IsEdit ? "edit" : "create") blog posts.
+                        </div>
+                    }
+                    else if (IsEdit && notFound)
+                    {
+                        <div class="alert alert-warning">
+                            <span class="bi bi-exclamation-triangle me-2"></span>
+                            Blog post not found.
+                        </div>
+                    }
+                    else if (loading)
+                    {
+                        <div class="text-center">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <EditForm Model="model" OnValidSubmit="HandleValidSubmit">
+                            <DataAnnotationsValidator />
+                            
+                            <div class="mb-3">
+                                <label for="title" class="form-label">Title <span class="text-danger">*</span></label>
+                                <InputText @bind-Value="model.Title" class="form-control" id="title" placeholder="Enter post title" />
+                                <ValidationMessage For="() => model.Title" class="text-danger" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="excerpt" class="form-label">Excerpt</label>
+                                <InputTextArea @bind-Value="model.Excerpt" class="form-control" id="excerpt" 
+                                             rows="3" placeholder="Brief description (optional)" />
+                                <div class="form-text">A short summary that appears in the blog list</div>
+                                <ValidationMessage For="() => model.Excerpt" class="text-danger" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="content" class="form-label">Content <span class="text-danger">*</span></label>
+                                <InputTextArea @bind-Value="model.Content" class="form-control" id="content" 
+                                             rows="15" placeholder="Write your blog post content here..." />
+                                <div class="form-text">Use line breaks for paragraphs</div>
+                                <ValidationMessage For="() => model.Content" class="text-danger" />
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <InputCheckbox @bind-Value="model.IsPublished" class="form-check-input" id="isPublished" />
+                                    <label class="form-check-label" for="isPublished">
+                                        Publish immediately
+                                    </label>
+                                </div>
+                                <div class="form-text">Unchecked posts are saved as drafts</div>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(errorMessage))
+                            {
+                                <div class="alert alert-danger">
+                                    <span class="bi bi-exclamation-triangle me-2"></span>
+                                    @errorMessage
+                                </div>
+                            }
+
+                            <div class="d-flex justify-content-between">
+                                <button type="button" class="btn btn-outline-secondary" @onclick="Cancel">
+                                    <span class="bi bi-x-circle me-1"></span>Cancel
+                                </button>
+                                
+                                <button type="submit" class="btn btn-primary" disabled="@saving">
+                                    @if (saving)
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                    }
+                                    else
+                                    {
+                                        <span class="bi bi-check-circle me-1"></span>
+                                    }
+                                    @(IsEdit ? "Update Post" : "Create Post")
+                                </button>
+                            </div>
+                        </EditForm>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Writing Tips</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <span class="bi bi-lightbulb text-warning me-2"></span>
+                            Keep your title clear and engaging
+                        </li>
+                        <li class="mb-2">
+                            <span class="bi bi-lightbulb text-warning me-2"></span>
+                            Write a compelling excerpt to draw readers in
+                        </li>
+                        <li class="mb-2">
+                            <span class="bi bi-lightbulb text-warning me-2"></span>
+                            Use paragraphs to break up your content
+                        </li>
+                        <li class="mb-2">
+                            <span class="bi bi-lightbulb text-warning me-2"></span>
+                            Save as draft to review before publishing
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int? Id { get; set; }
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
+
+    private BlogPostModel model = new();
+    private bool IsEdit => Id.HasValue;
+    private bool IsAdmin;
+    private bool loading = true;
+    private bool notFound;
+    private bool saving;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CheckAdminStatus();
+        
+        if (!IsAdmin)
+        {
+            loading = false;
+            return;
+        }
+
+        if (IsEdit)
+        {
+            await LoadBlogPost();
+        }
+        else
+        {
+            loading = false;
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (IsEdit && IsAdmin)
+        {
+            await LoadBlogPost();
+        }
+    }
+
+    private async Task CheckAdminStatus()
+    {
+        if (AuthenticationStateTask != null)
+        {
+            var authState = await AuthenticationStateTask;
+            if (authState.User.Identity?.IsAuthenticated == true)
+            {
+                // Check for admin claim with different possible values as fallback
+                IsAdmin = authState.User.HasClaim("IsAdmin", "True") ||
+                         authState.User.HasClaim("IsAdmin", "true") ||
+                         authState.User.HasClaim("IsAdmin", "1");
+
+                // If no claim found, check the user directly from the database
+                // This handles cases where the user was made admin after login
+                if (!IsAdmin)
+                {
+                    var userId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                    if (!string.IsNullOrEmpty(userId))
+                    {
+                        var user = await UserManager.FindByIdAsync(userId);
+                        if (user != null && user.IsAdmin)
+                        {
+                            IsAdmin = true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private async Task LoadBlogPost()
+    {
+        if (!Id.HasValue) return;
+
+        try
+        {
+            var blogPost = await BlogService.GetBlogPostByIdAsync(Id.Value);
+            if (blogPost == null)
+            {
+                notFound = true;
+            }
+            else
+            {
+                model = new BlogPostModel
+                {
+                    Title = blogPost.Title,
+                    Content = blogPost.Content,
+                    Excerpt = blogPost.Excerpt,
+                    IsPublished = blogPost.IsPublished
+                };
+                notFound = false;
+            }
+        }
+        catch (Exception)
+        {
+            notFound = true;
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (!IsAdmin || saving) return;
+
+        saving = true;
+        errorMessage = null;
+
+        try
+        {
+            if (AuthenticationStateTask != null)
+            {
+                var authState = await AuthenticationStateTask;
+                var userId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    errorMessage = "User not found.";
+                    return;
+                }
+
+                if (IsEdit && Id.HasValue)
+                {
+                    var existingPost = await BlogService.GetBlogPostByIdAsync(Id.Value);
+                    if (existingPost == null)
+                    {
+                        errorMessage = "Blog post not found.";
+                        return;
+                    }
+
+                    existingPost.Title = model.Title;
+                    existingPost.Content = model.Content;
+                    existingPost.Excerpt = model.Excerpt;
+                    existingPost.IsPublished = model.IsPublished;
+
+                    await BlogService.UpdateBlogPostAsync(existingPost);
+                    NavigationManager.NavigateTo($"/blog/{existingPost.Id}");
+                }
+                else
+                {
+                    var newPost = new BlogPost
+                    {
+                        Title = model.Title,
+                        Content = model.Content,
+                        Excerpt = model.Excerpt,
+                        IsPublished = model.IsPublished,
+                        AuthorId = userId
+                    };
+
+                    var createdPost = await BlogService.CreateBlogPostAsync(newPost);
+                    NavigationManager.NavigateTo($"/blog/{createdPost.Id}");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"An error occurred: {ex.Message}";
+        }
+        finally
+        {
+            saving = false;
+        }
+    }
+
+    private void Cancel()
+    {
+        if (IsEdit && Id.HasValue)
+        {
+            NavigationManager.NavigateTo($"/blog/{Id}");
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/blog");
+        }
+    }
+
+    public class BlogPostModel
+    {
+        [Required(ErrorMessage = "Title is required")]
+        [StringLength(200, ErrorMessage = "Title cannot be longer than 200 characters")]
+        public string Title { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Content is required")]
+        public string Content { get; set; } = string.Empty;
+
+        [StringLength(500, ErrorMessage = "Excerpt cannot be longer than 500 characters")]
+        public string? Excerpt { get; set; }
+
+        public bool IsPublished { get; set; }
+    }
+}

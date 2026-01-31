@@ -1,0 +1,148 @@
+@page "/admin/setup"
+@using BlazorBlog.Data
+@using BlazorBlog.Services
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Authorization
+@using System.Security.Claims
+@inject UserManager<ApplicationUser> UserManager
+@inject AdminClaimsService AdminClaimsService
+@inject NavigationManager NavigationManager
+@attribute [Authorize]
+@rendermode InteractiveServer
+
+<PageTitle>Admin Setup</PageTitle>
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">Admin Setup</h3>
+                </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(message))
+                    {
+                        <div class="alert @(isSuccess ? "alert-success" : "alert-danger")">
+                            @message
+                        </div>
+                    }
+                    
+                    @if (currentUser != null)
+                    {
+                        <div class="mb-3">
+                            <h5>Current User: @currentUser.UserName</h5>
+                            <p class="text-muted">Email: @currentUser.Email</p>
+                            <p>Admin Status: 
+                                @if (currentUser.IsAdmin)
+                                {
+                                    <span class="badge bg-success">Admin</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Regular User</span>
+                                }
+                            </p>
+                        </div>
+                        
+                        <hr>
+                        
+                        @if (!currentUser.IsAdmin)
+                        {
+                            <div class="alert alert-info">
+                                <h6>Make yourself an admin to manage blog posts.</h6>
+                                <p class="mb-3">This will give you permissions to create, edit, and delete blog posts.</p>
+                                <button class="btn btn-primary" @onclick="MakeCurrentUserAdmin" disabled="@processing">
+                                    @if (processing)
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                    }
+                                    Make Me Admin
+                                </button>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-success">
+                                <h6>You are an admin!</h6>
+                                <p class="mb-3">You can now create and manage blog posts.</p>
+                                <div class="d-grid gap-2">
+                                    <a href="/blog" class="btn btn-primary">View Blog</a>
+                                    <a href="/blog/create" class="btn btn-outline-primary">Create New Post</a>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
+    
+    private ApplicationUser? currentUser;
+    private string message = string.Empty;
+    private bool isSuccess;
+    private bool processing;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCurrentUser();
+    }
+
+    private async Task LoadCurrentUser()
+    {
+        if (AuthenticationStateTask != null)
+        {
+            var authState = await AuthenticationStateTask;
+            if (authState.User.Identity?.IsAuthenticated == true)
+            {
+                var userId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    currentUser = await UserManager.FindByIdAsync(userId);
+                }
+            }
+        }
+    }
+
+    private async Task MakeCurrentUserAdmin()
+    {
+        if (currentUser == null || processing) return;
+
+        processing = true;
+        message = string.Empty;
+
+        try
+        {
+            var success = await AdminClaimsService.SetUserAsAdminAsync(currentUser.Id);
+            
+            if (success)
+            {
+                // Reload user to reflect changes
+                await LoadCurrentUser();
+                message = "Successfully granted admin permissions! You can now manage blog posts.";
+                isSuccess = true;
+                
+                // Refresh the page to update claims
+                await Task.Delay(2000);
+                NavigationManager.NavigateTo("/admin/setup", forceLoad: true);
+            }
+            else
+            {
+                message = "Failed to grant admin permissions. Please try again.";
+                isSuccess = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            message = $"An error occurred: {ex.Message}";
+            isSuccess = false;
+        }
+        finally
+        {
+            processing = false;
+        }
+    }
+}

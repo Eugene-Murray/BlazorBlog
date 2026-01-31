@@ -1,0 +1,224 @@
+@page "/blog/{id:int}"
+@using BlazorBlog.Data
+@using BlazorBlog.Services
+@inject BlogService BlogService
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<PageTitle>@(blogPost?.Title ?? "Blog Post")</PageTitle>
+
+@if (blogPost == null)
+{
+    <div class="text-center mt-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+}
+else if (notFound)
+{
+    <div class="container mt-4">
+        <div class="alert alert-warning text-center">
+            <h4>Blog Post Not Found</h4>
+            <p>The requested blog post could not be found.</p>
+            <a href="/blog" class="btn btn-primary">Back to Blog</a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="container mt-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item"><a href="/blog">Blog</a></li>
+                <li class="breadcrumb-item active" aria-current="page">@blogPost.Title</li>
+            </ol>
+        </nav>
+
+        <article class="blog-post">
+            <header class="mb-4">
+                <h1 class="display-5 fw-bold text-dark mb-3">@blogPost.Title</h1>
+                
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="text-muted">
+                        <small>
+                            <span class="bi bi-person me-1"></span>By @blogPost.Author.UserName
+                            <span class="mx-2">•</span>
+                            <span class="bi bi-calendar3 me-1"></span>@blogPost.CreatedAt.ToString("MMMM dd, yyyy")
+                            @if (blogPost.CreatedAt.Date != blogPost.UpdatedAt.Date)
+                            {
+                                <span class="mx-2">•</span>
+                                <span class="bi bi-pencil me-1"></span>
+                                <text>Updated @blogPost.UpdatedAt.ToString("MMM dd, yyyy")</text>
+                            }
+                        </small>
+                    </div>
+                    
+                    <AuthorizeView>
+                        <Authorized>
+                            @if (IsAdmin)
+                            {
+                                <div class="btn-group" role="group">
+                                    <a href="/blog/edit/@blogPost.Id" class="btn btn-outline-primary btn-sm">
+                                        <span class="bi bi-pencil me-1"></span>Edit
+                                    </a>
+                                    <button class="btn btn-outline-danger btn-sm" @onclick="ConfirmDelete">
+                                        <span class="bi bi-trash me-1"></span>Delete
+                                    </button>
+                                </div>
+                            }
+                        </Authorized>
+                    </AuthorizeView>
+                </div>
+                
+                @if (!blogPost.IsPublished)
+                {
+                    <div class="alert alert-warning">
+                        <span class="bi bi-exclamation-triangle me-2"></span>
+                        <strong>Draft:</strong> This post is not published and only visible to administrators.
+                    </div>
+                }
+            </header>
+
+            <div class="blog-content">
+                @((MarkupString)FormatContent(blogPost.Content))
+            </div>
+        </article>
+
+        <hr class="my-5">
+        
+        <div class="text-center">
+            <a href="/blog" class="btn btn-outline-primary">
+                <span class="bi bi-arrow-left me-1"></span>Back to Blog
+            </a>
+        </div>
+    </div>
+}
+
+<!-- Delete Confirmation Modal -->
+@if (showDeleteModal)
+{
+    <div class="modal d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Delete</h5>
+                    <button type="button" class="btn-close" @onclick="CancelDelete"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete the blog post <strong>"@blogPost?.Title"</strong>?</p>
+                    <p class="text-muted">This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CancelDelete">Cancel</button>
+                    <button type="button" class="btn btn-danger" @onclick="DeleteConfirmed">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
+
+    private BlogPost? blogPost;
+    private bool notFound;
+    private bool IsAdmin;
+    private bool showDeleteModal;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CheckAdminStatus();
+        await LoadBlogPost();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadBlogPost();
+    }
+
+    private async Task LoadBlogPost()
+    {
+        try
+        {
+            blogPost = await BlogService.GetBlogPostByIdAsync(Id);
+            
+            if (blogPost == null)
+            {
+                notFound = true;
+                return;
+            }
+
+            // Check if post is published or user is admin
+            if (!blogPost.IsPublished && !IsAdmin)
+            {
+                notFound = true;
+                return;
+            }
+
+            notFound = false;
+        }
+        catch (Exception)
+        {
+            notFound = true;
+        }
+    }
+
+    private async Task CheckAdminStatus()
+    {
+        if (AuthenticationStateTask != null)
+        {
+            var authState = await AuthenticationStateTask;
+            if (authState.User.Identity?.IsAuthenticated == true)
+            {
+                IsAdmin = authState.User.HasClaim("IsAdmin", "True");
+            }
+        }
+    }
+
+    private string FormatContent(string content)
+    {
+        if (string.IsNullOrEmpty(content))
+            return string.Empty;
+
+        // Simple formatting - replace line breaks with <br> and paragraphs
+        var formatted = content
+            .Replace("\r\n", "\n")
+            .Replace("\r", "\n");
+
+        // Split into paragraphs and wrap in <p> tags
+        var paragraphs = formatted.Split("\n\n", StringSplitOptions.RemoveEmptyEntries);
+        var result = string.Join("", paragraphs.Select(p => $"<p>{p.Replace("\n", "<br>")}</p>"));
+
+        return result;
+    }
+
+    private void ConfirmDelete()
+    {
+        showDeleteModal = true;
+    }
+
+    private void CancelDelete()
+    {
+        showDeleteModal = false;
+    }
+
+    private async Task DeleteConfirmed()
+    {
+        if (blogPost != null)
+        {
+            try
+            {
+                await BlogService.DeleteBlogPostAsync(blogPost.Id);
+                NavigationManager.NavigateTo("/blog");
+            }
+            catch (Exception)
+            {
+                // Handle error - could add toast notification here
+                CancelDelete();
+            }
+        }
+    }
+}

@@ -1,0 +1,59 @@
+﻿@page "/"
+
+<PageTitle>Home - BlazorBlog</PageTitle>
+
+<div class="container mt-4">
+    <div class="jumbotron bg-primary text-white p-5 rounded mb-4">
+        <h1 class="display-4">Welcome to BlazorBlog!</h1>
+        <p class="lead">A modern blog platform built with Blazor WebAssembly and .NET 10</p>
+        <hr class="my-4">
+        <p>Share your thoughts, ideas, and stories with the world.</p>
+        <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+            <a class="btn btn-light btn-lg me-2" href="/blog" role="button">
+                <span class="bi bi-journal-text me-2"></span>View Blog Posts
+            </a>
+            <AuthorizeView>
+                <Authorized>
+                    <a class="btn btn-outline-light btn-lg" href="/blog/create" role="button">
+                        <span class="bi bi-plus-circle me-2"></span>Create Post
+                    </a>
+                </Authorized>
+                <NotAuthorized>
+                    <a class="btn btn-outline-light btn-lg" href="/Account/Register" role="button">
+                        <span class="bi bi-person-plus me-2"></span>Get Started
+                    </a>
+                </NotAuthorized>
+            </AuthorizeView>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <span class="bi bi-journal-text display-4 text-primary"></span>
+                    <h5 class="card-title mt-3">Read & Share</h5>
+                    <p class="card-text">Browse through a collection of interesting blog posts and share your own stories.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <span class="bi bi-shield-check display-4 text-success"></span>
+                    <h5 class="card-title mt-3">Secure & Fast</h5>
+                    <p class="card-text">Built with modern web technologies including Blazor WebAssembly and secure authentication.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <span class="bi bi-people display-4 text-info"></span>
+                    <h5 class="card-title mt-3">Community Driven</h5>
+                    <p class="card-text">Join our community of writers and readers. Share your expertise and learn from others.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

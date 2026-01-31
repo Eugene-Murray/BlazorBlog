@@ -1,0 +1,53 @@
+/* Blog content styling */
+.blog-content[b-zlwa7ajwtn] {
+    line-height: 1.7;
+    font-size: 1.1rem;
+}
+
+.blog-content p[b-zlwa7ajwtn] {
+    margin-bottom: 1.5rem;
+}
+
+.blog-content h1[b-zlwa7ajwtn],
+.blog-content h2[b-zlwa7ajwtn],
+.blog-content h3[b-zlwa7ajwtn],
+.blog-content h4[b-zlwa7ajwtn],
+.blog-content h5[b-zlwa7ajwtn],
+.blog-content h6[b-zlwa7ajwtn] {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.blog-content blockquote[b-zlwa7ajwtn] {
+    border-left: 4px solid var(--bs-primary);
+    padding-left: 1.5rem;
+    margin: 2rem 0;
+    font-style: italic;
+    color: var(--bs-secondary);
+}
+
+.blog-content code[b-zlwa7ajwtn] {
+    background-color: var(--bs-light);
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.25rem;
+    font-size: 0.9em;
+}
+
+.blog-content pre[b-zlwa7ajwtn] {
+    background-color: var(--bs-dark);
+    color: white;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    margin: 1.5rem 0;
+}
+
+.blog-content ul[b-zlwa7ajwtn],
+.blog-content ol[b-zlwa7ajwtn] {
+    margin-bottom: 1.5rem;
+}
+
+.blog-content li[b-zlwa7ajwtn] {
+    margin-bottom: 0.5rem;
+}
