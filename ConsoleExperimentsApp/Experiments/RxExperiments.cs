@@ -15,6 +15,7 @@ namespace ConsoleExperimentsApp.Experiments
 
             ObservableTimer();
             RangeExample();
+            MergMap();
 
             Console.ForegroundColor = ConsoleColor.Magenta;
             Console.WriteLine("Press Enter to exit...");
@@ -31,6 +32,28 @@ namespace ConsoleExperimentsApp.Experiments
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine(x);
+                Console.ResetColor();
+            });
+        }
+
+        private static void MergMap()
+        {
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("MergeMap Example:");
+            Console.ResetColor();
+
+            IObservable<string> sources = new[] { "A", "B", "C" }.ToObservable();
+
+            IObservable<string> result = sources.SelectMany(source =>
+                Observable.Range(1, 3)
+                    .Select(i => $"{source}{i}")
+                    .Delay(TimeSpan.FromMilliseconds(200 * new Random().Next(1, 4)))
+            );
+
+            result.Subscribe(x => 
+            {
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine($"MergeMap result: {x}");
                 Console.ResetColor();
             });
         }
