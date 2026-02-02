@@ -16,6 +16,8 @@ namespace ConsoleExperimentsApp.Experiments
             ObservableTimer();
             RangeExample();
             MergMap();
+            ConcatMapExample();
+            SwitchMapExample();
 
             Console.ForegroundColor = ConsoleColor.Magenta;
             Console.WriteLine("Press Enter to exit...");
@@ -54,6 +56,54 @@ namespace ConsoleExperimentsApp.Experiments
             {
                 Console.ForegroundColor = ConsoleColor.Cyan;
                 Console.WriteLine($"MergeMap result: {x}");
+                Console.ResetColor();
+            });
+        }
+
+        private static void ConcatMapExample()
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("ConcatMap Example (maintains order):");
+            Console.ResetColor();
+
+            IObservable<string> sources = new[] { "X", "Y", "Z" }.ToObservable();
+
+            IObservable<string> result = sources
+                .Select(source =>
+                    Observable.Range(1, 3)
+                        .Select(i => $"{source}{i}")
+                        .Delay(TimeSpan.FromMilliseconds(300))
+                )
+                .Concat();
+
+            result.Subscribe(x =>
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine($"ConcatMap result: {x}");
+                Console.ResetColor();
+            });
+        }
+
+        private static void SwitchMapExample()
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("SwitchMap Example (switches to latest):");
+            Console.ResetColor();
+
+            IObservable<string> sources = Observable.Interval(TimeSpan.FromMilliseconds(800))
+                .Take(3)
+                .Select(i => $"Source{i + 1}");
+
+            IObservable<string> result = sources.Select(source =>
+                Observable.Interval(TimeSpan.FromMilliseconds(300))
+                    .Take(5)
+                    .Select(i => $"{source}-Item{i + 1}")
+            ).Switch();
+
+            result.Subscribe(x => 
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"SwitchMap result: {x}");
                 Console.ResetColor();
             });
         }
