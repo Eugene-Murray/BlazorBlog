@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Admin\Admin\Admin.csproj" />
+    <ProjectReference Include="..\EM.CMS.GrpcService\EM.CMS.GrpcService.csproj" />
   </ItemGroup>
 
 </Project>
