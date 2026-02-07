@@ -9,7 +9,7 @@ namespace ConsoleExperimentsApp.Experiments
 {
     public static class RxExperiments
     {
-        public static async Task Run()
+        public static Task Run()
         {
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("RxExperiments");
@@ -61,6 +61,7 @@ namespace ConsoleExperimentsApp.Experiments
             Console.ForegroundColor = ConsoleColor.Magenta;
             Console.WriteLine("Press Enter to exit...");
             Console.ResetColor();
+            return Task.CompletedTask;
         }
 
         private static void RangeExample()

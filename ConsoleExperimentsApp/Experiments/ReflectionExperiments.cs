@@ -9,13 +9,9 @@ namespace ConsoleExperimentsApp.Experiments
     #region Helper Classes and Attributes
 
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Property)]
-    public class CustomDescriptionAttribute : Attribute
+    public class CustomDescriptionAttribute(string description) : Attribute
     {
-        public string Description { get; set; }
-        public CustomDescriptionAttribute(string description)
-        {
-            Description = description;
-        }
+        public string Description { get; set; } = description;
     }
 
     [CustomDescription("Sample person class for reflection")]
