@@ -86,6 +86,9 @@ while (running)
         case "23":
             await CQRSExperiments.Run();
             break;
+        case "24":
+            await DataStructuresAlgorithmsExperiments.Run();
+            break;
         case "0":
         case "exit":
         case "quit":
@@ -138,6 +141,7 @@ static void DisplayMenu()
     Console.WriteLine(" 21. ML.NET Experiments");
     Console.WriteLine(" 22. Polly Experiments");
     Console.WriteLine(" 23. CQRS Experiments");
+    Console.WriteLine(" 24. Data Structures & Algorithms Experiments");
     Console.WriteLine();
     Console.ForegroundColor = ConsoleColor.Cyan;
     Console.WriteLine(" 0.  Exit");
