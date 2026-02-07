@@ -26,7 +26,7 @@
                           Class="mt-0"></MudTextField>
             <MudButton Variant="Variant.Filled" 
                        Color="Color.Primary" 
-                       OnClick="OpenCreateUserDialog"
+                       OnClick="@(() => NavigationManager.NavigateTo("/admin/users/create"))"
                        StartIcon="@Icons.Material.Filled.Add">
                 Create User
             </MudButton>
@@ -60,7 +60,7 @@
                 <MudIconButton Icon="@Icons.Material.Filled.Edit" 
                                Color="Color.Primary" 
                                Size="Size.Small"
-                               OnClick="@(() => OpenEditUserDialog(context))" />
+                               OnClick="@(() => NavigationManager.NavigateTo($"/admin/users/{context.Id}/edit"))" />
                 <MudIconButton Icon="@Icons.Material.Filled.Security" 
                                Color="Color.Info" 
                                Size="Size.Small"
@@ -104,41 +104,6 @@
         loading = true;
         users = await UserManager.Users.ToListAsync();
         loading = false;
-    }
-
-    private async Task OpenCreateUserDialog()
-    {
-        var parameters = new DialogParameters<CreateUserDialog>
-        {
-            { x => x.UserManager, UserManager }
-        };
-        
-        var dialog = await DialogService.ShowAsync<CreateUserDialog>("Create New User", parameters);
-        var result = await dialog.Result;
-
-        if (!result.Canceled)
-        {
-            await LoadUsers();
-            Snackbar.Add("User created successfully!", Severity.Success);
-        }
-    }
-
-    private async Task OpenEditUserDialog(ApplicationUser user)
-    {
-        var parameters = new DialogParameters<EditUserDialog>
-        {
-            { x => x.User, user },
-            { x => x.UserManager, UserManager }
-        };
-        
-        var dialog = await DialogService.ShowAsync<EditUserDialog>("Edit User", parameters);
-        var result = await dialog.Result;
-
-        if (!result.Canceled)
-        {
-            await LoadUsers();
-            Snackbar.Add("User updated successfully!", Severity.Success);
-        }
     }
 
     private void NavigateToUserRoles(string userId)

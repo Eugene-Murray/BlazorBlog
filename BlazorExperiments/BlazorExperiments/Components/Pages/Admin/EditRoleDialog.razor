@@ -1,46 +1,83 @@
+@page "/admin/roles/{RoleId}/edit"
 @using Microsoft.AspNetCore.Identity
 @using MudBlazor
+@using Microsoft.AspNetCore.Authorization
+@rendermode InteractiveServer
+@inject RoleManager<IdentityRole> RoleManager
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
+@attribute [Authorize(Roles = "Admin")]
 
-<MudDialog>
-    <DialogContent>
-        <MudTextField @bind-Value="roleName" 
-                      Label="Role Name" 
-                      Required="true" 
-                      RequiredError="Role name is required!" />
-    </DialogContent>
-    <DialogActions>
-        <MudButton OnClick="Cancel">Cancel</MudButton>
-        <MudButton Color="Color.Primary" OnClick="Submit">Save</MudButton>
-    </DialogActions>
-</MudDialog>
+<PageTitle>Edit Role</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-4">
+    @if (loading)
+    {
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+    }
+    else if (role != null)
+    {
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.h4" Class="mb-4">Edit Role</MudText>
+
+            <MudTextField @bind-Value="roleName" 
+                          Label="Role Name" 
+                          Required="true" 
+                          RequiredError="Role name is required!"
+                          Class="mb-4" />
+
+            <MudStack Row="true" Spacing="2" Class="mt-4">
+                <MudButton Variant="Variant.Filled" Color="Color.Default" OnClick="Cancel">Cancel</MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Submit">Save Changes</MudButton>
+            </MudStack>
+        </MudPaper>
+    }
+    else
+    {
+        <MudAlert Severity="Severity.Error">Role not found</MudAlert>
+    }
+</MudContainer>
 
 @code {
-    [CascadingParameter] IDialogReference MudDialog { get; set; } = default!;
-    [Parameter] public IdentityRole Role { get; set; } = default!;
-    [Parameter] public RoleManager<IdentityRole> RoleManager { get; set; } = default!;
-    [Inject] private ISnackbar Snackbar { get; set; } = default!;
+    [Parameter] public string RoleId { get; set; } = default!;
 
+    private IdentityRole? role;
     private string roleName = string.Empty;
+    private bool loading = true;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        roleName = Role.Name ?? string.Empty;
+        role = await RoleManager.FindByIdAsync(RoleId);
+
+        if (role != null)
+        {
+            roleName = role.Name ?? string.Empty;
+        }
+
+        loading = false;
     }
 
     private async Task Submit()
     {
+        if (role == null)
+        {
+            Snackbar.Add("Role not found!", Severity.Error);
+            return;
+        }
+
         if (string.IsNullOrWhiteSpace(roleName))
         {
             Snackbar.Add("Role name is required!", Severity.Warning);
             return;
         }
 
-        Role.Name = roleName;
-        var result = await RoleManager.UpdateAsync(Role);
+        role.Name = roleName;
+        var result = await RoleManager.UpdateAsync(role);
 
         if (result.Succeeded)
         {
-            MudDialog.Close(DialogResult.Ok(true));
+            Snackbar.Add("Role updated successfully!", Severity.Success);
+            NavigationManager.NavigateTo("/admin/roles");
         }
         else
         {
@@ -48,5 +85,5 @@
         }
     }
 
-    private void Cancel() => MudDialog.Close();
+    private void Cancel() => NavigationManager.NavigateTo("/admin/roles");
 }

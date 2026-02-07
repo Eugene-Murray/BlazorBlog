@@ -1,41 +1,54 @@
+@page "/admin/users/create"
 @using Microsoft.AspNetCore.Identity
 @using BlazorExperiments.Data
 @using MudBlazor
+@using Microsoft.AspNetCore.Authorization
+@rendermode InteractiveServer
+@inject UserManager<ApplicationUser> UserManager
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
+@* @attribute [Authorize(Roles = "Admin")] *@
 
-<MudDialog>
-    <DialogContent>
+<PageTitle>Create User</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-4">
+    <MudPaper Class="pa-4">
+        <MudText Typo="Typo.h4" Class="mb-4">Create New User</MudText>
+
         <MudTextField @bind-Value="model.UserName" 
                       Label="Username" 
                       Required="true" 
-                      RequiredError="Username is required!" />
+                      RequiredError="Username is required!"
+                      Class="mb-3" />
         <MudTextField @bind-Value="model.Email" 
                       Label="Email" 
                       InputType="InputType.Email"
                       Required="true" 
-                      RequiredError="Email is required!" />
+                      RequiredError="Email is required!"
+                      Class="mb-3" />
         <MudTextField @bind-Value="model.Password" 
                       Label="Password" 
                       InputType="InputType.Password"
                       Required="true" 
-                      RequiredError="Password is required!" />
+                      RequiredError="Password is required!"
+                      Class="mb-3" />
         <MudTextField @bind-Value="model.PhoneNumber" 
                       Label="Phone Number" 
-                      InputType="InputType.Telephone" />
+                      InputType="InputType.Telephone"
+                      Class="mb-3" />
         <MudSwitch @bind-Value="model.EmailConfirmed" 
                    Label="Email Confirmed" 
-                   Color="Color.Primary" />
-    </DialogContent>
-    <DialogActions>
-        <MudButton OnClick="Cancel">Cancel</MudButton>
-        <MudButton Color="Color.Primary" OnClick="Submit">Create</MudButton>
-    </DialogActions>
-</MudDialog>
+                   Color="Color.Primary"
+                   Class="mb-4" />
+
+        <MudStack Row="true" Spacing="2" Class="mt-4">
+            <MudButton Variant="Variant.Filled" Color="Color.Default" OnClick="Cancel">Cancel</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Submit">Create User</MudButton>
+        </MudStack>
+    </MudPaper>
+</MudContainer>
 
 @code {
-    [CascadingParameter] IDialogReference MudDialog { get; set; } = default!;
-    [Parameter] public UserManager<ApplicationUser> UserManager { get; set; } = default!;
-    [Inject] private ISnackbar Snackbar { get; set; } = default!;
-
     private CreateUserModel model = new();
 
     private async Task Submit()
@@ -58,7 +71,8 @@
 
         if (result.Succeeded)
         {
-            MudDialog.Close(DialogResult.Ok(true));
+            Snackbar.Add("User created successfully!", Severity.Success);
+            NavigationManager.NavigateTo("/admin/users");
         }
         else
         {
@@ -66,7 +80,7 @@
         }
     }
 
-    private void Cancel() => MudDialog.Close();
+    private void Cancel() => NavigationManager.NavigateTo("/admin/users");
 
     private class CreateUserModel
     {

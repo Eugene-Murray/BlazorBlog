@@ -1,28 +1,40 @@
+@page "/admin/claims/add"
 @using System.Security.Claims
 @using MudBlazor
+@using Microsoft.AspNetCore.Authorization
+@rendermode InteractiveServer
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
+@attribute [Authorize(Roles = "Admin")]
 
-<MudDialog>
-    <DialogContent>
+<PageTitle>Add Claim</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-4">
+    <MudPaper Class="pa-4">
+        <MudText Typo="Typo.h4" Class="mb-4">Add New Claim</MudText>
+
         <MudTextField @bind-Value="claimType" 
                       Label="Claim Type" 
                       Required="true" 
                       RequiredError="Claim type is required!"
-                      Placeholder="e.g., Permission, Department, etc." />
+                      Placeholder="e.g., Permission, Department, etc."
+                      Class="mb-3" />
         <MudTextField @bind-Value="claimValue" 
                       Label="Claim Value" 
                       Required="true" 
                       RequiredError="Claim value is required!"
-                      Placeholder="e.g., CanEdit, HR, etc." />
-    </DialogContent>
-    <DialogActions>
-        <MudButton OnClick="Cancel">Cancel</MudButton>
-        <MudButton Color="Color.Primary" OnClick="Submit">Add</MudButton>
-    </DialogActions>
-</MudDialog>
+                      Placeholder="e.g., CanEdit, HR, etc."
+                      Class="mb-4" />
+
+        <MudStack Row="true" Spacing="2" Class="mt-4">
+            <MudButton Variant="Variant.Filled" Color="Color.Default" OnClick="Cancel">Cancel</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Submit">Add Claim</MudButton>
+        </MudStack>
+    </MudPaper>
+</MudContainer>
 
 @code {
-    [CascadingParameter] IDialogReference MudDialog { get; set; } = default!;
-    [Inject] private ISnackbar Snackbar { get; set; } = default!;
+    [SupplyParameterFromQuery] public string? ReturnUrl { get; set; }
 
     private string claimType = string.Empty;
     private string claimValue = string.Empty;
@@ -35,9 +47,14 @@
             return;
         }
 
-        var claim = new Claim(claimType, claimValue);
-        MudDialog.Close(DialogResult.Ok(claim));
+        // Store the claim data in NavigationManager state and go back
+        var returnUrl = ReturnUrl ?? "/admin/users";
+        NavigationManager.NavigateTo($"{returnUrl}?claimType={Uri.EscapeDataString(claimType)}&claimValue={Uri.EscapeDataString(claimValue)}");
     }
 
-    private void Cancel() => MudDialog.Close();
+    private void Cancel()
+    {
+        var returnUrl = ReturnUrl ?? "/admin/users";
+        NavigationManager.NavigateTo(returnUrl);
+    }
 }

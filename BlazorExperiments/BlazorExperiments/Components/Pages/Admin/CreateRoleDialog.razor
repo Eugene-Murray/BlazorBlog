@@ -1,24 +1,33 @@
+@page "/admin/roles/create"
 @using Microsoft.AspNetCore.Identity
 @using MudBlazor
+@using Microsoft.AspNetCore.Authorization
+@rendermode InteractiveServer
+@inject RoleManager<IdentityRole> RoleManager
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
+@attribute [Authorize(Roles = "Admin")]
 
-<MudDialog>
-    <DialogContent>
+<PageTitle>Create Role</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-4">
+    <MudPaper Class="pa-4">
+        <MudText Typo="Typo.h4" Class="mb-4">Create New Role</MudText>
+
         <MudTextField @bind-Value="roleName" 
                       Label="Role Name" 
                       Required="true" 
-                      RequiredError="Role name is required!" />
-    </DialogContent>
-    <DialogActions>
-        <MudButton OnClick="Cancel">Cancel</MudButton>
-        <MudButton Color="Color.Primary" OnClick="Submit">Create</MudButton>
-    </DialogActions>
-</MudDialog>
+                      RequiredError="Role name is required!"
+                      Class="mb-4" />
+
+        <MudStack Row="true" Spacing="2" Class="mt-4">
+            <MudButton Variant="Variant.Filled" Color="Color.Default" OnClick="Cancel">Cancel</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Submit">Create Role</MudButton>
+        </MudStack>
+    </MudPaper>
+</MudContainer>
 
 @code {
-    [CascadingParameter] IDialogReference MudDialog { get; set; } = default!;
-    [Parameter] public RoleManager<IdentityRole> RoleManager { get; set; } = default!;
-    [Inject] private ISnackbar Snackbar { get; set; } = default!;
-
     private string roleName = string.Empty;
 
     private async Task Submit()
@@ -34,7 +43,8 @@
 
         if (result.Succeeded)
         {
-            MudDialog.Close(DialogResult.Ok(true));
+            Snackbar.Add("Role created successfully!", Severity.Success);
+            NavigationManager.NavigateTo("/admin/roles");
         }
         else
         {
@@ -42,5 +52,5 @@
         }
     }
 
-    private void Cancel() => MudDialog.Close();
+    private void Cancel() => NavigationManager.NavigateTo("/admin/roles");
 }

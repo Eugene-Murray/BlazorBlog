@@ -20,12 +20,31 @@
         <MudText Typo="Typo.h4" Class="mb-4">Manage Claims for Role: @role.Name</MudText>
 
         <MudPaper Class="pa-4 mb-4">
-            <MudButton Variant="Variant.Filled" 
-                       Color="Color.Primary" 
-                       OnClick="OpenAddClaimDialog"
-                       StartIcon="@Icons.Material.Filled.Add">
-                Add Claim
-            </MudButton>
+            @if (showAddForm)
+            {
+                <MudText Typo="Typo.h6" Class="mb-3">Add New Claim</MudText>
+                <MudTextField @bind-Value="newClaimType" 
+                              Label="Claim Type" 
+                              Placeholder="e.g., Permission, Department"
+                              Class="mb-3" />
+                <MudTextField @bind-Value="newClaimValue" 
+                              Label="Claim Value" 
+                              Placeholder="e.g., CanEdit, HR"
+                              Class="mb-3" />
+                <MudStack Row="true" Spacing="2">
+                    <MudButton Variant="Variant.Filled" Color="Color.Default" OnClick="CancelAddClaim">Cancel</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddClaim">Add Claim</MudButton>
+                </MudStack>
+            }
+            else
+            {
+                <MudButton Variant="Variant.Filled" 
+                           Color="Color.Primary" 
+                           OnClick="ShowAddForm"
+                           StartIcon="@Icons.Material.Filled.Add">
+                    Add Claim
+                </MudButton>
+            }
         </MudPaper>
 
         <MudTable Items="@roleClaims" Dense="true" Hover="true" Loading="@loading" LoadingProgressColor="Color.Info">
@@ -68,6 +87,9 @@
     private List<Claim> roleClaims = new();
     private bool loading = true;
     private List<BreadcrumbItem> _breadcrumbItems = new();
+    private bool showAddForm = false;
+    private string newClaimType = string.Empty;
+    private string newClaimValue = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -85,34 +107,55 @@
     {
         loading = true;
         role = await RoleManager.FindByIdAsync(RoleId);
-        
+
         if (role != null)
         {
             roleClaims = (await RoleManager.GetClaimsAsync(role)).ToList();
         }
-        
+
         loading = false;
     }
 
-    private async Task OpenAddClaimDialog()
+    private void ShowAddForm()
     {
-        var parameters = new DialogParameters<AddClaimDialog>();
-        
-        var dialog = await DialogService.ShowAsync<AddClaimDialog>("Add Claim", parameters);
-        var result = await dialog.Result;
+        showAddForm = true;
+        newClaimType = string.Empty;
+        newClaimValue = string.Empty;
+    }
 
-        if (!result.Canceled && result.Data is Claim claim)
+    private void CancelAddClaim()
+    {
+        showAddForm = false;
+        newClaimType = string.Empty;
+        newClaimValue = string.Empty;
+    }
+
+    private async Task AddClaim()
+    {
+        if (role == null)
         {
-            var addResult = await RoleManager.AddClaimAsync(role!, claim);
-            if (addResult.Succeeded)
-            {
-                await LoadData();
-                Snackbar.Add("Claim added successfully!", Severity.Success);
-            }
-            else
-            {
-                Snackbar.Add($"Error: {string.Join(", ", addResult.Errors.Select(e => e.Description))}", Severity.Error);
-            }
+            Snackbar.Add("Role not found!", Severity.Error);
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(newClaimType) || string.IsNullOrWhiteSpace(newClaimValue))
+        {
+            Snackbar.Add("Please fill in all fields!", Severity.Warning);
+            return;
+        }
+
+        var claim = new Claim(newClaimType, newClaimValue);
+        var addResult = await RoleManager.AddClaimAsync(role, claim);
+
+        if (addResult.Succeeded)
+        {
+            await LoadData();
+            Snackbar.Add("Claim added successfully!", Severity.Success);
+            CancelAddClaim();
+        }
+        else
+        {
+            Snackbar.Add($"Error: {string.Join(", ", addResult.Errors.Select(e => e.Description))}", Severity.Error);
         }
     }
 

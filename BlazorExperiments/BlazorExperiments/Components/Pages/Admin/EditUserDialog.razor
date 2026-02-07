@@ -1,83 +1,126 @@
+@page "/admin/users/{UserId}/edit"
 @using Microsoft.AspNetCore.Identity
 @using BlazorExperiments.Data
 @using MudBlazor
+@using Microsoft.AspNetCore.Authorization
+@rendermode InteractiveServer
+@inject UserManager<ApplicationUser> UserManager
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
+@attribute [Authorize(Roles = "Admin")]
 
-<MudDialog>
-    <DialogContent>
-        <MudTextField @bind-Value="model.UserName" 
-                      Label="Username" 
-                      Required="true" 
-                      RequiredError="Username is required!" />
-        <MudTextField @bind-Value="model.Email" 
-                      Label="Email" 
-                      InputType="InputType.Email"
-                      Required="true" 
-                      RequiredError="Email is required!" />
-        <MudTextField @bind-Value="model.PhoneNumber" 
-                      Label="Phone Number" 
-                      InputType="InputType.Telephone" />
-        <MudSwitch @bind-Value="model.EmailConfirmed" 
-                   Label="Email Confirmed" 
-                   Color="Color.Primary" />
-        <MudSwitch @bind-Value="model.PhoneNumberConfirmed" 
-                   Label="Phone Number Confirmed" 
-                   Color="Color.Primary" />
-        <MudSwitch @bind-Value="model.TwoFactorEnabled" 
-                   Label="Two Factor Enabled" 
-                   Color="Color.Primary" />
-        <MudSwitch @bind-Value="model.LockoutEnabled" 
-                   Label="Lockout Enabled" 
-                   Color="Color.Primary" />
-    </DialogContent>
-    <DialogActions>
-        <MudButton OnClick="Cancel">Cancel</MudButton>
-        <MudButton Color="Color.Primary" OnClick="Submit">Save</MudButton>
-    </DialogActions>
-</MudDialog>
+<PageTitle>Edit User</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-4">
+    @if (loading)
+    {
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+    }
+    else if (model != null)
+    {
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.h4" Class="mb-4">Edit User</MudText>
+
+            <MudTextField @bind-Value="model.UserName" 
+                          Label="Username" 
+                          Required="true" 
+                          RequiredError="Username is required!"
+                          Class="mb-3" />
+            <MudTextField @bind-Value="model.Email" 
+                          Label="Email" 
+                          InputType="InputType.Email"
+                          Required="true" 
+                          RequiredError="Email is required!"
+                          Class="mb-3" />
+            <MudTextField @bind-Value="model.PhoneNumber" 
+                          Label="Phone Number" 
+                          InputType="InputType.Telephone"
+                          Class="mb-3" />
+            <MudSwitch @bind-Value="model.EmailConfirmed" 
+                       Label="Email Confirmed" 
+                       Color="Color.Primary"
+                       Class="mb-2" />
+            <MudSwitch @bind-Value="model.PhoneNumberConfirmed" 
+                       Label="Phone Number Confirmed" 
+                       Color="Color.Primary"
+                       Class="mb-2" />
+            <MudSwitch @bind-Value="model.TwoFactorEnabled" 
+                       Label="Two Factor Enabled" 
+                       Color="Color.Primary"
+                       Class="mb-2" />
+            <MudSwitch @bind-Value="model.LockoutEnabled" 
+                       Label="Lockout Enabled" 
+                       Color="Color.Primary"
+                       Class="mb-4" />
+
+            <MudStack Row="true" Spacing="2" Class="mt-4">
+                <MudButton Variant="Variant.Filled" Color="Color.Default" OnClick="Cancel">Cancel</MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Submit">Save Changes</MudButton>
+            </MudStack>
+        </MudPaper>
+    }
+    else
+    {
+        <MudAlert Severity="Severity.Error">User not found</MudAlert>
+    }
+</MudContainer>
 
 @code {
-    [CascadingParameter] IDialogReference MudDialog { get; set; } = default!;
-    [Parameter] public ApplicationUser User { get; set; } = default!;
-    [Parameter] public UserManager<ApplicationUser> UserManager { get; set; } = default!;
-    [Inject] private ISnackbar Snackbar { get; set; } = default!;
+    [Parameter] public string UserId { get; set; } = default!;
 
-    private EditUserModel model = new();
+    private ApplicationUser? user;
+    private EditUserModel? model;
+    private bool loading = true;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        model = new EditUserModel
+        user = await UserManager.FindByIdAsync(UserId);
+
+        if (user != null)
         {
-            UserName = User.UserName ?? string.Empty,
-            Email = User.Email ?? string.Empty,
-            PhoneNumber = User.PhoneNumber,
-            EmailConfirmed = User.EmailConfirmed,
-            PhoneNumberConfirmed = User.PhoneNumberConfirmed,
-            TwoFactorEnabled = User.TwoFactorEnabled,
-            LockoutEnabled = User.LockoutEnabled
-        };
+            model = new EditUserModel
+            {
+                UserName = user.UserName ?? string.Empty,
+                Email = user.Email ?? string.Empty,
+                PhoneNumber = user.PhoneNumber,
+                EmailConfirmed = user.EmailConfirmed,
+                PhoneNumberConfirmed = user.PhoneNumberConfirmed,
+                TwoFactorEnabled = user.TwoFactorEnabled,
+                LockoutEnabled = user.LockoutEnabled
+            };
+        }
+
+        loading = false;
     }
 
     private async Task Submit()
     {
+        if (user == null || model == null)
+        {
+            Snackbar.Add("User not found!", Severity.Error);
+            return;
+        }
+
         if (string.IsNullOrWhiteSpace(model.UserName) || string.IsNullOrWhiteSpace(model.Email))
         {
             Snackbar.Add("Username and Email are required!", Severity.Warning);
             return;
         }
 
-        User.UserName = model.UserName;
-        User.Email = model.Email;
-        User.PhoneNumber = model.PhoneNumber;
-        User.EmailConfirmed = model.EmailConfirmed;
-        User.PhoneNumberConfirmed = model.PhoneNumberConfirmed;
-        User.TwoFactorEnabled = model.TwoFactorEnabled;
-        User.LockoutEnabled = model.LockoutEnabled;
+        user.UserName = model.UserName;
+        user.Email = model.Email;
+        user.PhoneNumber = model.PhoneNumber;
+        user.EmailConfirmed = model.EmailConfirmed;
+        user.PhoneNumberConfirmed = model.PhoneNumberConfirmed;
+        user.TwoFactorEnabled = model.TwoFactorEnabled;
+        user.LockoutEnabled = model.LockoutEnabled;
 
-        var result = await UserManager.UpdateAsync(User);
+        var result = await UserManager.UpdateAsync(user);
 
         if (result.Succeeded)
         {
-            MudDialog.Close(DialogResult.Ok(true));
+            Snackbar.Add("User updated successfully!", Severity.Success);
+            NavigationManager.NavigateTo("/admin/users");
         }
         else
         {
@@ -85,7 +128,7 @@
         }
     }
 
-    private void Cancel() => MudDialog.Close();
+    private void Cancel() => NavigationManager.NavigateTo("/admin/users");
 
     private class EditUserModel
     {

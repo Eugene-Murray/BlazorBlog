@@ -25,7 +25,7 @@
                           Class="mt-0"></MudTextField>
             <MudButton Variant="Variant.Filled" 
                        Color="Color.Primary" 
-                       OnClick="OpenCreateRoleDialog"
+                       OnClick="@(() => NavigationManager.NavigateTo("/admin/roles/create"))"
                        StartIcon="@Icons.Material.Filled.Add">
                 Create Role
             </MudButton>
@@ -47,7 +47,7 @@
                 <MudIconButton Icon="@Icons.Material.Filled.Edit" 
                                Color="Color.Primary" 
                                Size="Size.Small"
-                               OnClick="@(() => OpenEditRoleDialog(context))" />
+                               OnClick="@(() => NavigationManager.NavigateTo($"/admin/roles/{context.Id}/edit"))" />
                 <MudIconButton Icon="@Icons.Material.Filled.Label" 
                                Color="Color.Secondary" 
                                Size="Size.Small"
@@ -85,41 +85,6 @@
         loading = true;
         roles = await RoleManager.Roles.ToListAsync();
         loading = false;
-    }
-
-    private async Task OpenCreateRoleDialog()
-    {
-        var parameters = new DialogParameters<CreateRoleDialog>
-        {
-            { x => x.RoleManager, RoleManager }
-        };
-        
-        var dialog = await DialogService.ShowAsync<CreateRoleDialog>("Create New Role", parameters);
-        var result = await dialog.Result;
-
-        if (!result.Canceled)
-        {
-            await LoadRoles();
-            Snackbar.Add("Role created successfully!", Severity.Success);
-        }
-    }
-
-    private async Task OpenEditRoleDialog(IdentityRole role)
-    {
-        var parameters = new DialogParameters<EditRoleDialog>
-        {
-            { x => x.Role, role },
-            { x => x.RoleManager, RoleManager }
-        };
-        
-        var dialog = await DialogService.ShowAsync<EditRoleDialog>("Edit Role", parameters);
-        var result = await dialog.Result;
-
-        if (!result.Canceled)
-        {
-            await LoadRoles();
-            Snackbar.Add("Role updated successfully!", Severity.Success);
-        }
     }
 
     private void NavigateToRoleClaims(string roleId)
