@@ -90,8 +90,8 @@ app.UseAntiforgery();
 app.MapStaticAssets();
 app.MapRazorComponents<BlazorExperiments.Components.App>()
     .AddInteractiveServerRenderMode()
-    .AddInteractiveWebAssemblyRenderMode();
-    // Remove the Client assembly reference since it's causing issues
+    .AddInteractiveWebAssemblyRenderMode()
+    .AddAdditionalAssemblies(typeof(BlazorExperiments.Client._Imports).Assembly);
 
 // Add additional endpoints required by the Identity /Account Razor components.
 app.MapAdditionalIdentityEndpoints();
