@@ -4,8 +4,10 @@ using ConsoleExperimentsApp.Experiments;
 
 Console.WriteLine(".Net C# Experiments");
 
-RxExperiments.Run();    
+//RxExperiments.Run();    
 
-SerilogExperiments.Run();
+//SerilogExperiments.Run();
+
+await EntityFrameworkExperiments.Run();
 
 Console.ReadLine();
