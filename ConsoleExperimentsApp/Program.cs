@@ -89,6 +89,12 @@ while (running)
         case "24":
             await DataStructuresAlgorithmsExperiments.Run();
             break;
+        case "25":
+            await RabbitMQExperiments.Run();
+            break;
+        case "26":
+            await NServiceBusExperiments.Run();
+            break;
         case "0":
         case "exit":
         case "quit":
@@ -142,6 +148,8 @@ static void DisplayMenu()
     Console.WriteLine(" 22. Polly Experiments");
     Console.WriteLine(" 23. CQRS Experiments");
     Console.WriteLine(" 24. Data Structures & Algorithms Experiments");
+    Console.WriteLine(" 25. RabbitMQ Experiments");
+    Console.WriteLine(" 26. NServiceBus Experiments");
     Console.WriteLine();
     Console.ForegroundColor = ConsoleColor.Cyan;
     Console.WriteLine(" 0.  Exit");

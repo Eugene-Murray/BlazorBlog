@@ -10,7 +10,9 @@
   <ItemGroup>
     <PackageReference Include="AutoMapper" />
     <PackageReference Include="Microsoft.ML" />
+    <PackageReference Include="NServiceBus" />
     <PackageReference Include="Polly" />
+    <PackageReference Include="RabbitMQ.Client" />
     <PackageReference Include="System.Reactive" />
     <PackageReference Include="Serilog" />
     <PackageReference Include="Serilog.Extensions.Hosting" />
