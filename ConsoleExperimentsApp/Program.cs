@@ -80,6 +80,9 @@ while (running)
         case "21":
             await MLNetExperiments.Run();
             break;
+        case "22":
+            await PollyExperiments.Run();
+            break;
         case "0":
         case "exit":
         case "quit":
@@ -130,6 +133,7 @@ static void DisplayMenu()
     Console.WriteLine(" 19. NewInCSharp12_13_14 Experiments");
     Console.WriteLine(" 20. MediatR Experiments");
     Console.WriteLine(" 21. ML.NET Experiments");
+    Console.WriteLine(" 22. Polly Experiments");
     Console.WriteLine();
     Console.ForegroundColor = ConsoleColor.Cyan;
     Console.WriteLine(" 0.  Exit");

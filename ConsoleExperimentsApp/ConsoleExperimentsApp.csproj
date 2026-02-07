@@ -10,6 +10,7 @@
   <ItemGroup>
     <PackageReference Include="AutoMapper" />
     <PackageReference Include="Microsoft.ML" />
+    <PackageReference Include="Polly" />
     <PackageReference Include="System.Reactive" />
     <PackageReference Include="Serilog" />
     <PackageReference Include="Serilog.Extensions.Hosting" />
