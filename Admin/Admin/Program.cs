@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Admin.Components;
 using Admin.Components.Account;
 using Admin.Data;
+using Admin.Services;
 using Fluxor;
 using MudBlazor.Services;
 
@@ -26,6 +27,9 @@ if (builder.Environment.IsDevelopment())
 
 // Add MudBlazor services
 builder.Services.AddMudServices();
+
+// Add NavMenu state service as Singleton to work across render mode boundaries
+builder.Services.AddSingleton<NavMenuStateService>();
 
 // Add Fluxor for Server-side rendering
 builder.Services.AddFluxor(options =>

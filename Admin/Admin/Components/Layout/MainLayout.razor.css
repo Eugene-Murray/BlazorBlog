@@ -10,6 +10,11 @@ main {
 
 .sidebar {
     background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
+    transition: width 0.3s ease;
+}
+
+.sidebar.collapsed {
+    width: 1rem;
 }
 
 .top-row {
@@ -21,17 +26,17 @@ main {
     align-items: center;
 }
 
-    .top-row ::deep a, .top-row ::deep .btn-link {
+    .top-row :global(a), .top-row :global(.btn-link) {
         white-space: nowrap;
         margin-left: 1.5rem;
         text-decoration: none;
     }
 
-    .top-row ::deep a:hover, .top-row ::deep .btn-link:hover {
+    .top-row :global(a:hover), .top-row :global(.btn-link:hover) {
         text-decoration: underline;
     }
 
-    .top-row ::deep a:first-child {
+    .top-row :global(a:first-child) {
         overflow: hidden;
         text-overflow: ellipsis;
     }
@@ -41,7 +46,7 @@ main {
         justify-content: space-between;
     }
 
-    .top-row ::deep a, .top-row ::deep .btn-link {
+    .top-row :global(a), .top-row :global(.btn-link) {
         margin-left: 0;
     }
 }
@@ -58,13 +63,17 @@ main {
         top: 0;
     }
 
+    .sidebar.collapsed {
+        width: 100px;
+    }
+
     .top-row {
         position: sticky;
         top: 0;
         z-index: 1;
     }
 
-    .top-row.auth ::deep a:first-child {
+    .top-row.auth :global(a:first-child) {
         flex: 1;
         text-align: right;
         width: 0;
