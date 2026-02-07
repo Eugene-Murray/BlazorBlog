@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Admin.ServiceDefaults\Admin.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\BlazorExperiments.ServiceDefaults\BlazorExperiments.ServiceDefaults.csproj" />
   </ItemGroup>
 
 </Project>

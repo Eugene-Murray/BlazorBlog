@@ -1,4 +1,5 @@
 using EM.CMS.GrpcService.Services;
+using Microsoft.Extensions.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
 

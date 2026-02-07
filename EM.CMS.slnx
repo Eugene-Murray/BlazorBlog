@@ -3,10 +3,10 @@
     <Project Path="UnitTestExamples/UnitTestExamples.csproj" Id="9c1a2981-4406-4d2e-898e-7d4a9636ba76" />
   </Folder>
   <Folder Name="/UI/">
-    <Project Path="Admin.AppHost/Admin.AppHost.csproj" />
-    <Project Path="Admin.ServiceDefaults/Admin.ServiceDefaults.csproj" />
-    <Project Path="Admin/Admin.Client/Admin.Client.csproj" />
-    <Project Path="Admin/Admin/Admin.csproj" />
+    <Project Path="BlazorExperiments.AppHost/BlazorExperiments.AppHost.csproj" />
+    <Project Path="BlazorExperiments.ServiceDefaults/BlazorExperiments.ServiceDefaults.csproj" />
+    <Project Path="BlazorExperiments/BlazorExperiments.Client/BlazorExperiments.Client.csproj" />
+    <Project Path="BlazorExperiments/BlazorExperiments/BlazorExperiments.csproj" />
     <Project Path="BlazorBlog/BlazorBlog.Client/BlazorBlog.Client.csproj" />
     <Project Path="BlazorBlog/BlazorBlog/BlazorBlog.csproj" />
     <Project Path="BlazorGallery/BlazorGallery.Client/BlazorGallery.Client.csproj" />
@@ -21,3 +21,4 @@
   <Project Path="EM.CMS.Domain/EM.CMS.Domain.csproj" />
   <Project Path="EM.CMS.Infrastracture/EM.CMS.Infrastracture.csproj" />
 </Solution>
+
