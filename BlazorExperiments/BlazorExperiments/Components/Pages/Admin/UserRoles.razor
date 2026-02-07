@@ -1,0 +1,165 @@
+@page "/admin/users/{UserId}/roles"
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using BlazorExperiments.Data
+@using MudBlazor
+@using Microsoft.AspNetCore.Authorization
+@rendermode InteractiveServer
+@inject UserManager<ApplicationUser> UserManager
+@inject RoleManager<IdentityRole> RoleManager
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+@* @attribute [Authorize(Roles = "Admin")] *@
+
+<PageTitle>Manage User Roles</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    <MudBreadcrumbs Items="_breadcrumbItems" Separator=">"></MudBreadcrumbs>
+    
+    @if (user != null)
+    {
+        <MudText Typo="Typo.h4" Class="mb-2">Manage Roles for @user.UserName</MudText>
+        <MudText Typo="Typo.body2" Class="mb-4">Email: @user.Email</MudText>
+
+        <MudPaper Class="pa-4 mb-4">
+            <MudText Typo="Typo.h6" Class="mb-3">Available Roles</MudText>
+            @if (loading)
+            {
+                <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+            }
+            else
+            {
+                @foreach (var role in allRoles)
+                {
+                    var isAssigned = userRoles.Contains(role.Name ?? "");
+                    <MudChip T="string" 
+                             Color="@(isAssigned ? Color.Success : Color.Default)" 
+                             OnClick="@(() => ToggleRole(role))"
+                             OnClose="@(() => RemoveRole(role))"
+                             CloseIcon="@(isAssigned ? Icons.Material.Filled.Close : null)"
+                             Class="ma-1">
+                        @role.Name
+                        @if (isAssigned)
+                        {
+                            <MudIcon Icon="@Icons.Material.Filled.Check" Size="Size.Small" Class="ml-2" />
+                        }
+                    </MudChip>
+                }
+            }
+        </MudPaper>
+
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.h6" Class="mb-3">Current Roles (@userRoles.Count)</MudText>
+            @if (userRoles.Any())
+            {
+                <MudStack Spacing="2">
+                    @foreach (var roleName in userRoles)
+                    {
+                        <MudPaper Class="pa-2" Elevation="0" Outlined="true">
+                            <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                                <MudChip T="string" Color="Color.Success" Size="Size.Small" Text="@roleName" />
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                               Color="Color.Error" 
+                                               Size="Size.Small"
+                                               OnClick="@(() => RemoveRoleByName(roleName))" />
+                            </MudStack>
+                        </MudPaper>
+                    }
+                </MudStack>
+            }
+            else
+            {
+                <MudText Typo="Typo.body2" Color="Color.Secondary">No roles assigned</MudText>
+            }
+        </MudPaper>
+    }
+    else if (!loading)
+    {
+        <MudAlert Severity="Severity.Error">User not found</MudAlert>
+    }
+</MudContainer>
+
+@code {
+    [Parameter] public string UserId { get; set; } = default!;
+
+    private ApplicationUser? user;
+    private List<IdentityRole> allRoles = new();
+    private List<string> userRoles = new();
+    private bool loading = true;
+    private List<BreadcrumbItem> _breadcrumbItems = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _breadcrumbItems = new List<BreadcrumbItem>
+        {
+            new BreadcrumbItem("Admin", href: "/admin/users"),
+            new BreadcrumbItem("Users", href: "/admin/users"),
+            new BreadcrumbItem("Roles", href: null, disabled: true)
+        };
+
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        loading = true;
+        user = await UserManager.FindByIdAsync(UserId);
+        
+        if (user != null)
+        {
+            allRoles = await RoleManager.Roles.ToListAsync();
+            userRoles = (await UserManager.GetRolesAsync(user)).ToList();
+        }
+        
+        loading = false;
+    }
+
+    private async Task ToggleRole(IdentityRole role)
+    {
+        if (user == null || role.Name == null) return;
+
+        var isAssigned = userRoles.Contains(role.Name);
+        
+        if (isAssigned)
+        {
+            await RemoveRoleByName(role.Name);
+        }
+        else
+        {
+            var result = await UserManager.AddToRoleAsync(user, role.Name);
+            if (result.Succeeded)
+            {
+                userRoles.Add(role.Name);
+                Snackbar.Add($"Role '{role.Name}' added successfully!", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add($"Error: {string.Join(", ", result.Errors.Select(e => e.Description))}", Severity.Error);
+            }
+        }
+    }
+
+    private async Task RemoveRole(IdentityRole role)
+    {
+        if (role.Name != null)
+        {
+            await RemoveRoleByName(role.Name);
+        }
+    }
+
+    private async Task RemoveRoleByName(string roleName)
+    {
+        if (user == null) return;
+
+        var result = await UserManager.RemoveFromRoleAsync(user, roleName);
+        if (result.Succeeded)
+        {
+            userRoles.Remove(roleName);
+            Snackbar.Add($"Role '{roleName}' removed successfully!", Severity.Success);
+        }
+        else
+        {
+            Snackbar.Add($"Error: {string.Join(", ", result.Errors.Select(e => e.Description))}", Severity.Error);
+        }
+    }
+}

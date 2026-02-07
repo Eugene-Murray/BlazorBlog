@@ -5,6 +5,7 @@ using BlazorExperiments.Components;
 using BlazorExperiments.Components.Account;
 using BlazorExperiments.Data;
 using BlazorExperiments.Services;
+using BlazorExperiments.Extensions;
 using Fluxor;
 using MudBlazor.Services;
 
@@ -60,6 +61,7 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
         options.SignIn.RequireConfirmedAccount = true;
         options.Stores.SchemaVersion = IdentitySchemaVersions.Version3;
     })
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddSignInManager()
     .AddDefaultTokenProviders();
@@ -67,6 +69,12 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
 var app = builder.Build();
+
+// Seed admin role and user in development
+if (app.Environment.IsDevelopment())
+{
+    await DatabaseSeeder.SeedAdminRoleAndUserAsync(app.Services);
+}
 
 app.MapDefaultEndpoints();
 

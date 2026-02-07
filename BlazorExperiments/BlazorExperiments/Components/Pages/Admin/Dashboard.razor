@@ -1,0 +1,129 @@
+@page "/admin"
+@using MudBlazor
+@using Microsoft.AspNetCore.Authorization
+@rendermode InteractiveServer
+@inject NavigationManager NavigationManager
+@* @attribute [Authorize(Roles = "Admin")] *@
+
+<PageTitle>Admin Dashboard</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4">
+    <MudText Typo="Typo.h3" Class="mb-4">Admin Dashboard</MudText>
+    <MudText Typo="Typo.body1" Class="mb-6">Manage ASP.NET Identity Users, Roles, and Claims</MudText>
+
+    <MudGrid>
+        <MudItem xs="12" sm="6" md="4">
+            <MudCard Elevation="3" Class="cursor-pointer" @onclick="@(() => NavigateTo("/admin/users"))">
+                <MudCardContent>
+                    <MudStack AlignItems="AlignItems.Center" Spacing="2">
+                        <MudIcon Icon="@Icons.Material.Filled.People" Size="Size.Large" Color="Color.Primary" />
+                        <MudText Typo="Typo.h5">Users</MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">
+                            Manage user accounts, create new users, edit user details, and delete users
+                        </MudText>
+                    </MudStack>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton Variant="Variant.Text" Color="Color.Primary" FullWidth="true">
+                        Manage Users
+                    </MudButton>
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="4">
+            <MudCard Elevation="3" Class="cursor-pointer" @onclick="@(() => NavigateTo("/admin/roles"))">
+                <MudCardContent>
+                    <MudStack AlignItems="AlignItems.Center" Spacing="2">
+                        <MudIcon Icon="@Icons.Material.Filled.Security" Size="Size.Large" Color="Color.Secondary" />
+                        <MudText Typo="Typo.h5">Roles</MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">
+                            Create and manage roles, define role-based permissions
+                        </MudText>
+                    </MudStack>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton Variant="Variant.Text" Color="Color.Secondary" FullWidth="true">
+                        Manage Roles
+                    </MudButton>
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="4">
+            <MudCard Elevation="3">
+                <MudCardContent>
+                    <MudStack AlignItems="AlignItems.Center" Spacing="2">
+                        <MudIcon Icon="@Icons.Material.Filled.AdminPanelSettings" Size="Size.Large" Color="Color.Tertiary" />
+                        <MudText Typo="Typo.h5">Identity Management</MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">
+                            Complete control over ASP.NET Identity system
+                        </MudText>
+                    </MudStack>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+
+    <MudPaper Class="pa-4 mt-6">
+        <MudText Typo="Typo.h6" Class="mb-3">Quick Actions</MudText>
+        <MudStack Row="true" Spacing="2" Wrap="Wrap.Wrap">
+            <MudButton Variant="Variant.Filled" 
+                       Color="Color.Primary" 
+                       StartIcon="@Icons.Material.Filled.PersonAdd"
+                       OnClick="@(() => NavigateTo("/admin/users"))">
+                Create New User
+            </MudButton>
+            <MudButton Variant="Variant.Filled" 
+                       Color="Color.Secondary" 
+                       StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="@(() => NavigateTo("/admin/roles"))">
+                Create New Role
+            </MudButton>
+        </MudStack>
+    </MudPaper>
+
+    <MudPaper Class="pa-4 mt-4">
+        <MudText Typo="Typo.h6" Class="mb-3">Features</MudText>
+        <MudStack Spacing="2">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" />
+                <MudText>User Management - Create, Edit, Delete users</MudText>
+            </MudStack>
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" />
+                <MudText>Role Management - Create, Edit, Delete roles</MudText>
+            </MudStack>
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" />
+                <MudText>User Roles - Assign/Remove roles to/from users</MudText>
+            </MudStack>
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" />
+                <MudText>User Claims - Manage user-specific claims</MudText>
+            </MudStack>
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" />
+                <MudText>Role Claims - Manage role-based claims</MudText>
+            </MudStack>
+        </MudStack>
+    </MudPaper>
+</MudContainer>
+
+<style>
+    .cursor-pointer {
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+    
+    .cursor-pointer:hover {
+        transform: translateY(-4px);
+    }
+</style>
+
+@code {
+    private void NavigateTo(string url)
+    {
+        NavigationManager.NavigateTo(url);
+    }
+}

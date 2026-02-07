@@ -1,0 +1,151 @@
+@page "/admin/roles"
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using MudBlazor
+@using Microsoft.AspNetCore.Authorization
+@rendermode InteractiveServer
+@inject RoleManager<IdentityRole> RoleManager
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@* @attribute [Authorize(Roles = "Admin")] *@
+
+<PageTitle>Role Management</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4">
+    <MudText Typo="Typo.h4" Class="mb-4">Role Management</MudText>
+    
+    <MudPaper Class="pa-4 mb-4">
+        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+            <MudTextField @bind-Value="searchString" 
+                          Placeholder="Search roles..." 
+                          Adornment="Adornment.Start" 
+                          AdornmentIcon="@Icons.Material.Filled.Search" 
+                          IconSize="Size.Medium"
+                          Immediate="true"
+                          Class="mt-0"></MudTextField>
+            <MudButton Variant="Variant.Filled" 
+                       Color="Color.Primary" 
+                       OnClick="OpenCreateRoleDialog"
+                       StartIcon="@Icons.Material.Filled.Add">
+                Create Role
+            </MudButton>
+        </MudStack>
+    </MudPaper>
+
+    <MudTable Items="@FilteredRoles" Dense="true" Hover="true" Loading="@loading" LoadingProgressColor="Color.Info">
+        <HeaderContent>
+            <MudTh>Role Name</MudTh>
+            <MudTh>Normalized Name</MudTh>
+            <MudTh>Actions</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Role Name">
+                <MudChip T="string" Color="Color.Primary" Text="@context.Name" />
+            </MudTd>
+            <MudTd DataLabel="Normalized Name">@context.NormalizedName</MudTd>
+            <MudTd DataLabel="Actions">
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" 
+                               Color="Color.Primary" 
+                               Size="Size.Small"
+                               OnClick="@(() => OpenEditRoleDialog(context))" />
+                <MudIconButton Icon="@Icons.Material.Filled.Label" 
+                               Color="Color.Secondary" 
+                               Size="Size.Small"
+                               OnClick="@(() => NavigateToRoleClaims(context.Id))"
+                               Title="Manage Claims" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" 
+                               Color="Color.Error" 
+                               Size="Size.Small"
+                               OnClick="@(() => DeleteRole(context))" />
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+</MudContainer>
+
+@code {
+    private List<IdentityRole> roles = new();
+    private string searchString = "";
+    private bool loading = true;
+    
+    [Inject] private NavigationManager NavigationManager { get; set; } = default!;
+
+    private IEnumerable<IdentityRole> FilteredRoles => 
+        string.IsNullOrWhiteSpace(searchString) 
+            ? roles 
+            : roles.Where(r => 
+                (r.Name?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false));
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadRoles();
+    }
+
+    private async Task LoadRoles()
+    {
+        loading = true;
+        roles = await RoleManager.Roles.ToListAsync();
+        loading = false;
+    }
+
+    private async Task OpenCreateRoleDialog()
+    {
+        var parameters = new DialogParameters<CreateRoleDialog>
+        {
+            { x => x.RoleManager, RoleManager }
+        };
+        
+        var dialog = await DialogService.ShowAsync<CreateRoleDialog>("Create New Role", parameters);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await LoadRoles();
+            Snackbar.Add("Role created successfully!", Severity.Success);
+        }
+    }
+
+    private async Task OpenEditRoleDialog(IdentityRole role)
+    {
+        var parameters = new DialogParameters<EditRoleDialog>
+        {
+            { x => x.Role, role },
+            { x => x.RoleManager, RoleManager }
+        };
+        
+        var dialog = await DialogService.ShowAsync<EditRoleDialog>("Edit Role", parameters);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await LoadRoles();
+            Snackbar.Add("Role updated successfully!", Severity.Success);
+        }
+    }
+
+    private void NavigateToRoleClaims(string roleId)
+    {
+        NavigationManager.NavigateTo($"/admin/roles/{roleId}/claims");
+    }
+
+    private async Task DeleteRole(IdentityRole role)
+    {
+        bool? result = await DialogService.ShowMessageBox(
+            "Confirm Delete",
+            $"Are you sure you want to delete role '{role.Name}'?",
+            yesText: "Delete", cancelText: "Cancel");
+
+        if (result == true)
+        {
+            var deleteResult = await RoleManager.DeleteAsync(role);
+            if (deleteResult.Succeeded)
+            {
+                await LoadRoles();
+                Snackbar.Add("Role deleted successfully!", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add($"Error deleting role: {string.Join(", ", deleteResult.Errors.Select(e => e.Description))}", Severity.Error);
+            }
+        }
+    }
+}

@@ -1,0 +1,46 @@
+@using Microsoft.AspNetCore.Identity
+@using MudBlazor
+
+<MudDialog>
+    <DialogContent>
+        <MudTextField @bind-Value="roleName" 
+                      Label="Role Name" 
+                      Required="true" 
+                      RequiredError="Role name is required!" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit">Create</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IDialogReference MudDialog { get; set; } = default!;
+    [Parameter] public RoleManager<IdentityRole> RoleManager { get; set; } = default!;
+    [Inject] private ISnackbar Snackbar { get; set; } = default!;
+
+    private string roleName = string.Empty;
+
+    private async Task Submit()
+    {
+        if (string.IsNullOrWhiteSpace(roleName))
+        {
+            Snackbar.Add("Role name is required!", Severity.Warning);
+            return;
+        }
+
+        var role = new IdentityRole(roleName);
+        var result = await RoleManager.CreateAsync(role);
+
+        if (result.Succeeded)
+        {
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        else
+        {
+            Snackbar.Add($"Error: {string.Join(", ", result.Errors.Select(e => e.Description))}", Severity.Error);
+        }
+    }
+
+    private void Cancel() => MudDialog.Close();
+}

@@ -1,0 +1,79 @@
+@using Microsoft.AspNetCore.Identity
+@using BlazorExperiments.Data
+@using MudBlazor
+
+<MudDialog>
+    <DialogContent>
+        <MudTextField @bind-Value="model.UserName" 
+                      Label="Username" 
+                      Required="true" 
+                      RequiredError="Username is required!" />
+        <MudTextField @bind-Value="model.Email" 
+                      Label="Email" 
+                      InputType="InputType.Email"
+                      Required="true" 
+                      RequiredError="Email is required!" />
+        <MudTextField @bind-Value="model.Password" 
+                      Label="Password" 
+                      InputType="InputType.Password"
+                      Required="true" 
+                      RequiredError="Password is required!" />
+        <MudTextField @bind-Value="model.PhoneNumber" 
+                      Label="Phone Number" 
+                      InputType="InputType.Telephone" />
+        <MudSwitch @bind-Value="model.EmailConfirmed" 
+                   Label="Email Confirmed" 
+                   Color="Color.Primary" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit">Create</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IDialogReference MudDialog { get; set; } = default!;
+    [Parameter] public UserManager<ApplicationUser> UserManager { get; set; } = default!;
+    [Inject] private ISnackbar Snackbar { get; set; } = default!;
+
+    private CreateUserModel model = new();
+
+    private async Task Submit()
+    {
+        if (string.IsNullOrWhiteSpace(model.UserName) || string.IsNullOrWhiteSpace(model.Email) || string.IsNullOrWhiteSpace(model.Password))
+        {
+            Snackbar.Add("Please fill in all required fields!", Severity.Warning);
+            return;
+        }
+
+        var user = new ApplicationUser
+        {
+            UserName = model.UserName,
+            Email = model.Email,
+            EmailConfirmed = model.EmailConfirmed,
+            PhoneNumber = model.PhoneNumber
+        };
+
+        var result = await UserManager.CreateAsync(user, model.Password);
+
+        if (result.Succeeded)
+        {
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        else
+        {
+            Snackbar.Add($"Error: {string.Join(", ", result.Errors.Select(e => e.Description))}", Severity.Error);
+        }
+    }
+
+    private void Cancel() => MudDialog.Close();
+
+    private class CreateUserModel
+    {
+        public string UserName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+        public string? PhoneNumber { get; set; }
+        public bool EmailConfirmed { get; set; }
+    }
+}

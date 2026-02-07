@@ -1,0 +1,43 @@
+@using System.Security.Claims
+@using MudBlazor
+
+<MudDialog>
+    <DialogContent>
+        <MudTextField @bind-Value="claimType" 
+                      Label="Claim Type" 
+                      Required="true" 
+                      RequiredError="Claim type is required!"
+                      Placeholder="e.g., Permission, Department, etc." />
+        <MudTextField @bind-Value="claimValue" 
+                      Label="Claim Value" 
+                      Required="true" 
+                      RequiredError="Claim value is required!"
+                      Placeholder="e.g., CanEdit, HR, etc." />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit">Add</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IDialogReference MudDialog { get; set; } = default!;
+    [Inject] private ISnackbar Snackbar { get; set; } = default!;
+
+    private string claimType = string.Empty;
+    private string claimValue = string.Empty;
+
+    private void Submit()
+    {
+        if (string.IsNullOrWhiteSpace(claimType) || string.IsNullOrWhiteSpace(claimValue))
+        {
+            Snackbar.Add("Please fill in all required fields!", Severity.Warning);
+            return;
+        }
+
+        var claim = new Claim(claimType, claimValue);
+        MudDialog.Close(DialogResult.Ok(claim));
+    }
+
+    private void Cancel() => MudDialog.Close();
+}

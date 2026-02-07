@@ -1,0 +1,144 @@
+@page "/admin/users/{UserId}/claims"
+@using Microsoft.AspNetCore.Identity
+@using System.Security.Claims
+@using BlazorExperiments.Data
+@using MudBlazor
+@using Microsoft.AspNetCore.Authorization
+@rendermode InteractiveServer
+@inject UserManager<ApplicationUser> UserManager
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+@* @attribute [Authorize(Roles = "Admin")] *@
+
+<PageTitle>Manage User Claims</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    <MudBreadcrumbs Items="_breadcrumbItems" Separator=">"></MudBreadcrumbs>
+    
+    @if (user != null)
+    {
+        <MudText Typo="Typo.h4" Class="mb-2">Manage Claims for @user.UserName</MudText>
+        <MudText Typo="Typo.body2" Class="mb-4">Email: @user.Email</MudText>
+
+        <MudPaper Class="pa-4 mb-4">
+            <MudButton Variant="Variant.Filled" 
+                       Color="Color.Primary" 
+                       OnClick="OpenAddClaimDialog"
+                       StartIcon="@Icons.Material.Filled.Add">
+                Add Claim
+            </MudButton>
+        </MudPaper>
+
+        <MudTable Items="@userClaims" Dense="true" Hover="true" Loading="@loading" LoadingProgressColor="Color.Info">
+            <HeaderContent>
+                <MudTh>Claim Type</MudTh>
+                <MudTh>Claim Value</MudTh>
+                <MudTh>Actions</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Claim Type">
+                    <MudChip T="string" Color="Color.Primary" Size="Size.Small" Text="@context.Type" />
+                </MudTd>
+                <MudTd DataLabel="Claim Value">@context.Value</MudTd>
+                <MudTd DataLabel="Actions">
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" 
+                                   Color="Color.Error" 
+                                   Size="Size.Small"
+                                   OnClick="@(() => RemoveClaim(context))" />
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+
+        @if (!userClaims.Any() && !loading)
+        {
+            <MudPaper Class="pa-4 mt-4">
+                <MudText Typo="Typo.body2" Color="Color.Secondary">No claims assigned</MudText>
+            </MudPaper>
+        }
+    }
+    else if (!loading)
+    {
+        <MudAlert Severity="Severity.Error">User not found</MudAlert>
+    }
+</MudContainer>
+
+@code {
+    [Parameter] public string UserId { get; set; } = default!;
+
+    private ApplicationUser? user;
+    private List<Claim> userClaims = new();
+    private bool loading = true;
+    private List<BreadcrumbItem> _breadcrumbItems = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _breadcrumbItems = new List<BreadcrumbItem>
+        {
+            new BreadcrumbItem("Admin", href: "/admin/users"),
+            new BreadcrumbItem("Users", href: "/admin/users"),
+            new BreadcrumbItem("Claims", href: null, disabled: true)
+        };
+
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        loading = true;
+        user = await UserManager.FindByIdAsync(UserId);
+        
+        if (user != null)
+        {
+            userClaims = (await UserManager.GetClaimsAsync(user)).ToList();
+        }
+        
+        loading = false;
+    }
+
+    private async Task OpenAddClaimDialog()
+    {
+        var parameters = new DialogParameters<AddClaimDialog>();
+        
+        var dialog = await DialogService.ShowAsync<AddClaimDialog>("Add Claim", parameters);
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is Claim claim)
+        {
+            var addResult = await UserManager.AddClaimAsync(user!, claim);
+            if (addResult.Succeeded)
+            {
+                await LoadData();
+                Snackbar.Add("Claim added successfully!", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add($"Error: {string.Join(", ", addResult.Errors.Select(e => e.Description))}", Severity.Error);
+            }
+        }
+    }
+
+    private async Task RemoveClaim(Claim claim)
+    {
+        if (user == null) return;
+
+        bool? result = await DialogService.ShowMessageBox(
+            "Confirm Delete",
+            $"Are you sure you want to remove claim '{claim.Type}: {claim.Value}'?",
+            yesText: "Delete", cancelText: "Cancel");
+
+        if (result == true)
+        {
+            var removeResult = await UserManager.RemoveClaimAsync(user, claim);
+            if (removeResult.Succeeded)
+            {
+                await LoadData();
+                Snackbar.Add("Claim removed successfully!", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add($"Error: {string.Join(", ", removeResult.Errors.Select(e => e.Description))}", Severity.Error);
+            }
+        }
+    }
+}

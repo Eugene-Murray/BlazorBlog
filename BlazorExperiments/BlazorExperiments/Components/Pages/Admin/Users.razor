@@ -1,0 +1,175 @@
+@page "/admin/users"
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using BlazorExperiments.Data
+@using MudBlazor
+@using Microsoft.AspNetCore.Authorization
+@rendermode InteractiveServer
+@inject UserManager<ApplicationUser> UserManager
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@* @attribute [Authorize(Roles = "Admin")] *@
+
+<PageTitle>User Management</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraExtraLarge" Class="mt-4">
+    <MudText Typo="Typo.h4" Class="mb-4">User Management</MudText>
+    
+    <MudPaper Class="pa-4 mb-4">
+        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+            <MudTextField @bind-Value="searchString" 
+                          Placeholder="Search users..." 
+                          Adornment="Adornment.Start" 
+                          AdornmentIcon="@Icons.Material.Filled.Search" 
+                          IconSize="Size.Medium"
+                          Immediate="true"
+                          Class="mt-0"></MudTextField>
+            <MudButton Variant="Variant.Filled" 
+                       Color="Color.Primary" 
+                       OnClick="OpenCreateUserDialog"
+                       StartIcon="@Icons.Material.Filled.Add">
+                Create User
+            </MudButton>
+        </MudStack>
+    </MudPaper>
+
+    <MudTable Items="@FilteredUsers" Dense="true" Hover="true" Loading="@loading" LoadingProgressColor="Color.Info">
+        <HeaderContent>
+            <MudTh>Username</MudTh>
+            <MudTh>Email</MudTh>
+            <MudTh>Email Confirmed</MudTh>
+            <MudTh>Phone Number</MudTh>
+            <MudTh>Two Factor</MudTh>
+            <MudTh>Lockout End</MudTh>
+            <MudTh>Actions</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Username">@context.UserName</MudTd>
+            <MudTd DataLabel="Email">@context.Email</MudTd>
+            <MudTd DataLabel="Email Confirmed">
+                <MudChip T="string" Color="@(context.EmailConfirmed ? Color.Success : Color.Warning)" Size="Size.Small" Text="@(context.EmailConfirmed ? "Yes" : "No")" />
+            </MudTd>
+            <MudTd DataLabel="Phone Number">@(context.PhoneNumber ?? "N/A")</MudTd>
+            <MudTd DataLabel="Two Factor">
+                <MudChip T="string" Color="@(context.TwoFactorEnabled ? Color.Success : Color.Default)" Size="Size.Small" Text="@(context.TwoFactorEnabled ? "Enabled" : "Disabled")" />
+            </MudTd>
+            <MudTd DataLabel="Lockout End">
+                @(context.LockoutEnd.HasValue && context.LockoutEnd > DateTimeOffset.Now ? context.LockoutEnd.Value.ToString("g") : "Not Locked")
+            </MudTd>
+            <MudTd DataLabel="Actions">
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" 
+                               Color="Color.Primary" 
+                               Size="Size.Small"
+                               OnClick="@(() => OpenEditUserDialog(context))" />
+                <MudIconButton Icon="@Icons.Material.Filled.Security" 
+                               Color="Color.Info" 
+                               Size="Size.Small"
+                               OnClick="@(() => NavigateToUserRoles(context.Id))"
+                               Title="Manage Roles" />
+                <MudIconButton Icon="@Icons.Material.Filled.Label" 
+                               Color="Color.Secondary" 
+                               Size="Size.Small"
+                               OnClick="@(() => NavigateToUserClaims(context.Id))"
+                               Title="Manage Claims" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" 
+                               Color="Color.Error" 
+                               Size="Size.Small"
+                               OnClick="@(() => DeleteUser(context))" />
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+</MudContainer>
+
+@code {
+    private List<ApplicationUser> users = new();
+    private string searchString = "";
+    private bool loading = true;
+    
+    [Inject] private NavigationManager NavigationManager { get; set; } = default!;
+
+    private IEnumerable<ApplicationUser> FilteredUsers => 
+        string.IsNullOrWhiteSpace(searchString) 
+            ? users 
+            : users.Where(u => 
+                (u.UserName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (u.Email?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false));
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsers();
+    }
+
+    private async Task LoadUsers()
+    {
+        loading = true;
+        users = await UserManager.Users.ToListAsync();
+        loading = false;
+    }
+
+    private async Task OpenCreateUserDialog()
+    {
+        var parameters = new DialogParameters<CreateUserDialog>
+        {
+            { x => x.UserManager, UserManager }
+        };
+        
+        var dialog = await DialogService.ShowAsync<CreateUserDialog>("Create New User", parameters);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await LoadUsers();
+            Snackbar.Add("User created successfully!", Severity.Success);
+        }
+    }
+
+    private async Task OpenEditUserDialog(ApplicationUser user)
+    {
+        var parameters = new DialogParameters<EditUserDialog>
+        {
+            { x => x.User, user },
+            { x => x.UserManager, UserManager }
+        };
+        
+        var dialog = await DialogService.ShowAsync<EditUserDialog>("Edit User", parameters);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await LoadUsers();
+            Snackbar.Add("User updated successfully!", Severity.Success);
+        }
+    }
+
+    private void NavigateToUserRoles(string userId)
+    {
+        NavigationManager.NavigateTo($"/admin/users/{userId}/roles");
+    }
+
+    private void NavigateToUserClaims(string userId)
+    {
+        NavigationManager.NavigateTo($"/admin/users/{userId}/claims");
+    }
+
+    private async Task DeleteUser(ApplicationUser user)
+    {
+        bool? result = await DialogService.ShowMessageBox(
+            "Confirm Delete",
+            $"Are you sure you want to delete user '{user.UserName}'?",
+            yesText: "Delete", cancelText: "Cancel");
+
+        if (result == true)
+        {
+            var deleteResult = await UserManager.DeleteAsync(user);
+            if (deleteResult.Succeeded)
+            {
+                await LoadUsers();
+                Snackbar.Add("User deleted successfully!", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add($"Error deleting user: {string.Join(", ", deleteResult.Errors.Select(e => e.Description))}", Severity.Error);
+            }
+        }
+    }
+}
