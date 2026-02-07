@@ -5,6 +5,7 @@ using Admin.Components;
 using Admin.Components.Account;
 using Admin.Data;
 using Fluxor;
+using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,16 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents()
     .AddAuthenticationStateSerialization();
+
+// Configure Circuit options for detailed errors in development
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddServerSideBlazor()
+        .AddCircuitOptions(options => { options.DetailedErrors = true; });
+}
+
+// Add MudBlazor services
+builder.Services.AddMudServices();
 
 // Add Fluxor for Server-side rendering
 builder.Services.AddFluxor(options =>
