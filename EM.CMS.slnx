@@ -1,4 +1,5 @@
 <Solution>
+  <Folder Name="/Test/" />
   <Folder Name="/UI/">
     <Project Path="Admin.AppHost/Admin.AppHost.csproj" />
     <Project Path="Admin.ServiceDefaults/Admin.ServiceDefaults.csproj" />
