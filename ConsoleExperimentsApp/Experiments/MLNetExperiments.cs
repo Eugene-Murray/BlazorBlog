@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ConsoleExperimentsApp.Experiments
 {
-    public class AutoMapperExperiments
+    public class MLNetExperiments
     {
     }
 }
