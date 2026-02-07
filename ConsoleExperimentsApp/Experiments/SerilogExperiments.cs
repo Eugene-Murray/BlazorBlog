@@ -9,7 +9,7 @@ namespace ConsoleExperimentsApp.Experiments
 {
     public class SerilogExperiments
     {
-        public static void Run()
+        public static async Task Run()
         {
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("SerilogExperiments");

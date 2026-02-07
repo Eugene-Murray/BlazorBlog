@@ -6,7 +6,7 @@ namespace ConsoleExperimentsApp.Experiments
 {
     public static class CQRSExperiments
     {
-        public static void Run()
+        public static async Task Run()
         {
             Console.WriteLine("CQRS Experiments");
             // Placeholder for CQRS experiment code

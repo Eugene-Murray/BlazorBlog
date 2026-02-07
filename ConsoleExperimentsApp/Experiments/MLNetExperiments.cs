@@ -6,7 +6,7 @@ namespace ConsoleExperimentsApp.Experiments
 {
     public static class MLNetExperiments
     {
-        public static void Run()
+        public static async Task Run()
         {
             Console.WriteLine("ML.NET Experiments");
             // Placeholder for ML.NET experiment code

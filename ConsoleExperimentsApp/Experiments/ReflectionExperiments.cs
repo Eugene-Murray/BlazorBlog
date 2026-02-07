@@ -79,7 +79,7 @@ namespace ConsoleExperimentsApp.Experiments
 
     public class ReflectionExperiments
     {
-        public static void Run()
+        public static async Task Run()
         {
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("=== Reflection Experiments ===");

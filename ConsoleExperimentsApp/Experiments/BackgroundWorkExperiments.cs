@@ -6,7 +6,7 @@ namespace ConsoleExperimentsApp.Experiments
 {
     public static class BackgroundWorkExperiments
     {
-        public static void Run()
+        public static async Task Run()
         {
             Console.WriteLine("Background Work Experiments");
             // Placeholder for background work experiment code

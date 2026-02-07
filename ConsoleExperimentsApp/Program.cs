@@ -18,58 +18,58 @@ while (running)
     switch (choice)
     {
         case "1":
-            RxExperiments.Run();
+            await RxExperiments.Run();
             break;
         case "2":
-            SerilogExperiments.Run();
+            await SerilogExperiments.Run();
             break;
         case "3":
             await EntityFrameworkExperiments.Run();
             break;
         case "4":
-            TPLExperiments.Run();
+            await TPLExperiments.Run();
             break;
         case "5":
-            AspectCodingExperiments.Run();
+            await AspectCodingExperiments.Run();
             break;
         case "6":
-            AutoMapperExperiments.Run();
+            await AutoMapperExperiments.Run();
             break;
         case "7":
-            BackgroundWorkExperiments.Run();
+            await BackgroundWorkExperiments.Run();
             break;
         case "8":
-            ChannelsExperiments.Run();
+            await ChannelsExperiments.Run();
             break;
         case "9":
-            CQRSExperiments.Run();
+            await CQRSExperiments.Run();
             break;
         case "10":
-            DesignPatternsExperiments.Run();
+            await DesignPatternsExperiments.Run();
             break;
         case "11":
-            EnumerableCollectionsExperiments.Run();
+            await EnumerableCollectionsExperiments.Run();
             break;
         case "12":
-            ExtensionMethodExperiments.Run();
+            await ExtensionMethodExperiments.Run();
             break;
         case "13":
-            GarbageCollectionExperiments.Run();
+            await GarbageCollectionExperiments.Run();
             break;
         case "14":
-            GenericsExperiments.Run();
+            await GenericsExperiments.Run();
             break;
         case "15":
-            LinqExperiments.Run();
+            await LinqExperiments.Run();
             break;
         case "16":
-            MemorySpanExperiments.Run();
+            await MemorySpanExperiments.Run();
             break;
         case "17":
-            MLNetExperiments.Run();
+            await MLNetExperiments.Run();
             break;
         case "18":
-            ReflectionExperiments.Run();
+            await ReflectionExperiments.Run();
             break;
         case "0":
         case "exit":

@@ -7,7 +7,7 @@ namespace ConsoleExperimentsApp.Experiments
 {
     public class ExtensionMethodExperiments
     {
-        public static void Run()
+        public static async Task Run()
         {
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("=== Extension Methods and Blocks Experiments ===");

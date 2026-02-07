@@ -9,7 +9,7 @@ namespace ConsoleExperimentsApp.Experiments
 {
     public static class RxExperiments
     {
-        public static void Run()
+        public static async Task Run()
         {
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("RxExperiments");

@@ -6,7 +6,7 @@ namespace ConsoleExperimentsApp.Experiments
 {
     public static class AutoMapperExperiments
     {
-        public static void Run()
+        public static async Task Run()
         {
             Console.WriteLine("AutoMapper Experiments");
             // Placeholder for AutoMapper experiment code
