@@ -31,12 +31,12 @@ builder.Services.AddMudServices();
 // Add NavMenu state service as Singleton to work across render mode boundaries
 builder.Services.AddSingleton<NavMenuStateService>();
 
-// Add Fluxor for Server-side rendering
+// Add Fluxor for Server-side rendering (no Redux DevTools on server)
 builder.Services.AddFluxor(options =>
 {
     options.ScanAssemblies(
         typeof(Program).Assembly,
-        typeof(BlazorExperiments.Client._Imports).Assembly);
+        typeof(BlazorExperiments.Client._Imports).Assembly); // Scan client assembly too!
 });
 
 builder.Services.AddCascadingAuthenticationState();

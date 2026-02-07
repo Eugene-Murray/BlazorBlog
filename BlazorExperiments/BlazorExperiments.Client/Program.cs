@@ -9,15 +9,11 @@ builder.Services.AddAuthorizationCore();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddAuthenticationStateDeserialization();
 
-// Add Fluxor
+// Add Fluxor for WebAssembly
 builder.Services.AddFluxor(options =>
 {
     options.ScanAssemblies(typeof(Program).Assembly);
-    options.UseReduxDevTools(rdt =>
-    {
-        rdt.Name = "My application";
-        rdt.EnableStackTrace();
-    });
+    options.UseReduxDevTools(); // Redux DevTools only work in WebAssembly
     options.AddMiddleware<LoggingMiddleware>();
 });
 

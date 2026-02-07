@@ -9,16 +9,11 @@ public record CounterState
     public bool IsLoading { get; init; }
     public string? LastIncrementedBy { get; init; }
 
+    // Parameterless constructor for Fluxor to create initial state
     public CounterState()
     {
         Count = 0;
         IsLoading = false;
-    }
-
-    private CounterState(int count, bool isLoading, string? lastIncrementedBy)
-    {
-        Count = count;
-        IsLoading = isLoading;
-        LastIncrementedBy = lastIncrementedBy;
+        LastIncrementedBy = null;
     }
 }
