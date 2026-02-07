@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Admin.Components;
 using Admin.Components.Account;
 using Admin.Data;
+using Fluxor;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +15,14 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents()
     .AddAuthenticationStateSerialization();
+
+// Add Fluxor for Server-side rendering
+builder.Services.AddFluxor(options =>
+{
+    options.ScanAssemblies(
+        typeof(Program).Assembly,
+        typeof(Admin.Client._Imports).Assembly);
+});
 
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityRedirectManager>();

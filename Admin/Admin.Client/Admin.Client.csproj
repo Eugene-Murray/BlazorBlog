@@ -10,8 +10,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" />
+	<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" />
+	<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" />
+	<PackageReference Include="Fluxor.Blazor.Web" />
+	<PackageReference Include="Fluxor.Blazor.Web.ReduxDevTools" />
   </ItemGroup>
 
 </Project>
