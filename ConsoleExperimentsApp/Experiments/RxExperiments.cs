@@ -151,7 +151,8 @@ namespace ConsoleExperimentsApp.Experiments
         {
             IObservable<long> ticks = Observable.Timer(
                 dueTime: TimeSpan.Zero,
-                period: TimeSpan.FromSeconds(1));
+                period: TimeSpan.FromSeconds(1))
+                .Take(10);
 
             ticks.Subscribe(x => 
             {

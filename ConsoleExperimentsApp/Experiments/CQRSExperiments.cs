@@ -4,7 +4,13 @@ using System.Text;
 
 namespace ConsoleExperimentsApp.Experiments
 {
-    internal class CQRSExperiments
+    public static class CQRSExperiments
     {
+        public static void Run()
+        {
+            Console.WriteLine("CQRS Experiments");
+            // Placeholder for CQRS experiment code
+            Console.WriteLine("CQRS experiment completed.");
+        }   
     }
 }
