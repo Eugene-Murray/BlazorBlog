@@ -1,0 +1,115 @@
+﻿@page "/quickgrid"
+@attribute [StreamRendering]
+@using Microsoft.AspNetCore.Components.QuickGrid
+@rendermode InteractiveServer
+
+<PageTitle>QuickGrid Examples</PageTitle>
+
+<h1>QuickGrid Examples</h1>
+
+<p>This component demonstrates various QuickGrid features including sorting, filtering, and pagination.</p>
+
+<h2>Basic QuickGrid</h2>
+<Microsoft.AspNetCore.Components.QuickGrid.QuickGrid Items="@people" Class="table table-striped">
+    <Microsoft.AspNetCore.Components.QuickGrid.PropertyColumn Property="@(p => p.Id)" Sortable="true" />
+    <Microsoft.AspNetCore.Components.QuickGrid.PropertyColumn Property="@(p => p.FirstName)" Sortable="true" />
+    <Microsoft.AspNetCore.Components.QuickGrid.PropertyColumn Property="@(p => p.LastName)" Sortable="true" />
+    <Microsoft.AspNetCore.Components.QuickGrid.PropertyColumn Property="@(p => p.Email)" Sortable="true" />
+    <Microsoft.AspNetCore.Components.QuickGrid.PropertyColumn Property="@(p => p.Department)" Sortable="true" />
+    <Microsoft.AspNetCore.Components.QuickGrid.PropertyColumn Property="@(p => p.Salary)" Format="C" Sortable="true" />
+</Microsoft.AspNetCore.Components.QuickGrid.QuickGrid>
+
+<h2 class="mt-5">QuickGrid with Pagination</h2>
+<Microsoft.AspNetCore.Components.QuickGrid.QuickGrid Items="@filteredPeople" Class="table table-striped" Pagination="@pagination">
+    <Microsoft.AspNetCore.Components.QuickGrid.PropertyColumn Property="@(p => p.Id)" Sortable="true" />
+    <Microsoft.AspNetCore.Components.QuickGrid.PropertyColumn Property="@(p => p.FirstName)" Sortable="true" />
+    <Microsoft.AspNetCore.Components.QuickGrid.PropertyColumn Property="@(p => p.LastName)" Sortable="true" />
+    <Microsoft.AspNetCore.Components.QuickGrid.PropertyColumn Property="@(p => p.Email)" Sortable="true" />
+    <Microsoft.AspNetCore.Components.QuickGrid.PropertyColumn Property="@(p => p.Department)" Sortable="true" />
+    <Microsoft.AspNetCore.Components.QuickGrid.PropertyColumn Property="@(p => p.Salary)" Format="C" Sortable="true" />
+</Microsoft.AspNetCore.Components.QuickGrid.QuickGrid>
+
+<Microsoft.AspNetCore.Components.QuickGrid.Paginator State="@pagination" />
+
+<h2 class="mt-5">QuickGrid with Custom Columns</h2>
+<Microsoft.AspNetCore.Components.QuickGrid.QuickGrid Items="@people" Class="table table-striped">
+    <Microsoft.AspNetCore.Components.QuickGrid.PropertyColumn Property="@(p => p.Id)" Sortable="true" />
+    <Microsoft.AspNetCore.Components.QuickGrid.PropertyColumn Property="@(p => p.FirstName)" Title="First Name" Sortable="true" />
+    <Microsoft.AspNetCore.Components.QuickGrid.PropertyColumn Property="@(p => p.LastName)" Title="Last Name" Sortable="true" />
+    <Microsoft.AspNetCore.Components.QuickGrid.TemplateColumn Title="Full Name">
+        @context.FirstName @context.LastName
+    </Microsoft.AspNetCore.Components.QuickGrid.TemplateColumn>
+    <Microsoft.AspNetCore.Components.QuickGrid.TemplateColumn Title="Status">
+        <span class="badge @(context.IsActive ? "bg-success" : "bg-secondary")">
+            @(context.IsActive ? "Active" : "Inactive")
+        </span>
+    </Microsoft.AspNetCore.Components.QuickGrid.TemplateColumn>
+    <Microsoft.AspNetCore.Components.QuickGrid.TemplateColumn Title="Actions">
+        <button class="btn btn-sm btn-primary" @onclick="@(() => EditPerson(context))">Edit</button>
+        <button class="btn btn-sm btn-danger" @onclick="@(() => DeletePerson(context))">Delete</button>
+    </Microsoft.AspNetCore.Components.QuickGrid.TemplateColumn>
+</Microsoft.AspNetCore.Components.QuickGrid.QuickGrid>
+
+@if (selectedPerson != null)
+{
+    <div class="alert alert-info mt-3">
+        <strong>Last Action:</strong> @lastAction - @selectedPerson.FirstName @selectedPerson.LastName
+    </div>
+}
+
+@code {
+    private IQueryable<Person>? people;
+    private IQueryable<Person>? filteredPeople;
+    private PaginationState pagination = new() { ItemsPerPage = 5 };
+    private Person? selectedPerson;
+    private string lastAction = "";
+
+    protected override void OnInitialized()
+    {
+        // Generate sample data
+        var samplePeople = new List<Person>();
+        var firstNames = new[] { "John", "Jane", "Bob", "Alice", "Charlie", "Diana", "Eve", "Frank", "Grace", "Henry" };
+        var lastNames = new[] { "Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez" };
+        var departments = new[] { "Engineering", "Marketing", "Sales", "HR", "Finance", "Operations" };
+
+        for (int i = 1; i <= 25; i++)
+        {
+            samplePeople.Add(new Person
+            {
+                Id = i,
+                FirstName = firstNames[Random.Shared.Next(firstNames.Length)],
+                LastName = lastNames[Random.Shared.Next(lastNames.Length)],
+                Email = $"user{i}@example.com",
+                Department = departments[Random.Shared.Next(departments.Length)],
+                Salary = Random.Shared.Next(40000, 150000),
+                IsActive = Random.Shared.Next(0, 2) == 1
+            });
+        }
+
+        people = samplePeople.AsQueryable();
+        filteredPeople = samplePeople.AsQueryable();
+    }
+
+    private void EditPerson(Person person)
+    {
+        selectedPerson = person;
+        lastAction = "Edit";
+    }
+
+    private void DeletePerson(Person person)
+    {
+        selectedPerson = person;
+        lastAction = "Delete";
+    }
+
+    private class Person
+    {
+        public int Id { get; set; }
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Department { get; set; } = string.Empty;
+        public decimal Salary { get; set; }
+        public bool IsActive { get; set; }
+    }
+}

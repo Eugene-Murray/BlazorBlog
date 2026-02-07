@@ -10,6 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid" />
     <ProjectReference Include="..\..\Admin.ServiceDefaults\Admin.ServiceDefaults.csproj" />
     <ProjectReference Include="..\Admin.Client\Admin.Client.csproj" />
     <PackageReference Include="Fluxor" />
