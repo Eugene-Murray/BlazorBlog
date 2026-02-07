@@ -1,5 +1,7 @@
 <Solution>
-  <Folder Name="/Test/" />
+  <Folder Name="/Test/">
+    <Project Path="UnitTestExamples/UnitTestExamples.csproj" Id="9c1a2981-4406-4d2e-898e-7d4a9636ba76" />
+  </Folder>
   <Folder Name="/UI/">
     <Project Path="Admin.AppHost/Admin.AppHost.csproj" />
     <Project Path="Admin.ServiceDefaults/Admin.ServiceDefaults.csproj" />
