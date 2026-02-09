@@ -1,6 +1,29 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
-using ConsoleExperimentsApp.Experiments;
+using ConsoleExperimentsApp.Experiments.Rx;
+using ConsoleExperimentsApp.Experiments.Serilog;
+using ConsoleExperimentsApp.Experiments.EntityFramework;
+using ConsoleExperimentsApp.Experiments.TPL;
+using ConsoleExperimentsApp.Experiments.AspectCoding;
+using ConsoleExperimentsApp.Experiments.AutoMapper;
+using ConsoleExperimentsApp.Experiments.BackgroundWork;
+using ConsoleExperimentsApp.Experiments.Channels;
+using ConsoleExperimentsApp.Experiments.CQRS;
+using ConsoleExperimentsApp.Experiments.DesignPatterns;
+using ConsoleExperimentsApp.Experiments.EnumerableCollections;
+using ConsoleExperimentsApp.Experiments.ExtensionMethod;
+using ConsoleExperimentsApp.Experiments.GarbageCollection;
+using ConsoleExperimentsApp.Experiments.Generics;
+using ConsoleExperimentsApp.Experiments.Linq;
+using ConsoleExperimentsApp.Experiments.MemorySpan;
+using ConsoleExperimentsApp.Experiments.MLNet;
+using ConsoleExperimentsApp.Experiments.Reflection;
+using ConsoleExperimentsApp.Experiments.CSharpVersions;
+using ConsoleExperimentsApp.Experiments.MediatR;
+using ConsoleExperimentsApp.Experiments.Polly;
+using ConsoleExperimentsApp.Experiments.DataStructuresAlgorithms;
+using ConsoleExperimentsApp.Experiments.RabbitMQ;
+using ConsoleExperimentsApp.Experiments.NServiceBus;
 
 Console.ForegroundColor = ConsoleColor.White;
 Console.WriteLine("######## .Net C# Experiments ##########");
