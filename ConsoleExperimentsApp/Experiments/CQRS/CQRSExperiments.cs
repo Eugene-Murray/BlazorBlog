@@ -8,7 +8,8 @@ namespace ConsoleExperimentsApp.Experiments.CQRS
     {
         public static async Task Run()
         {
-            Console.WriteLine("=== CQRS and Event Sourcing Experiments ===\n");
+            Console.WriteLine("=== CQRS and Event Sourcing Experiments ===");
+            Console.WriteLine("Description: Demonstrating Command Query Responsibility Segregation (CQRS) and Event Sourcing patterns.\n");
 
             var eventStore = new EventStore();
             var commandHandler = new AccountCommandHandler(eventStore);

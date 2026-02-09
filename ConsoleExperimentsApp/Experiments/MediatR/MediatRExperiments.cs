@@ -142,6 +142,7 @@ namespace ConsoleExperimentsApp.Experiments.MediatR
         {
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("=== MediatR Experiments ===");
+            Console.WriteLine("Description: Demonstrating the Mediator pattern for CQRS with commands, queries, notifications, and pipeline behaviors.");
             Console.ResetColor();
 
             // Setup DI container

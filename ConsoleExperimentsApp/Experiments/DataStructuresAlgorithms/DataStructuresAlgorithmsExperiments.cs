@@ -9,7 +9,8 @@ namespace ConsoleExperimentsApp.Experiments.DataStructuresAlgorithms
         public static async Task Run()
         {
             Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine("=== Data Structures & Algorithms Experiments ===\n");
+            Console.WriteLine("=== Data Structures & Algorithms Experiments ===");
+            Console.WriteLine("Description: Demonstrating fundamental data structures and classic algorithms including sorting, searching, and recursion.\n");
             Console.ResetColor();
 
             // Data Structures

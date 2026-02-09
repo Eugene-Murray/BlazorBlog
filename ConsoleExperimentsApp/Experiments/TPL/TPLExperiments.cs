@@ -13,7 +13,8 @@ namespace ConsoleExperimentsApp.Experiments.TPL
         public static async Task Run()
         {
             Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine("TPLExperiments");
+            Console.WriteLine("=== Task Parallel Library (TPL) Experiments ===");
+            Console.WriteLine("Description: Demonstrating parallel programming with Tasks, async/await, PLINQ, and concurrent collections.");
             Console.ResetColor();
 
             try

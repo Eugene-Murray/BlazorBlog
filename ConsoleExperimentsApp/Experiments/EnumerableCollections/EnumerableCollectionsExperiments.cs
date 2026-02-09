@@ -13,6 +13,7 @@ namespace ConsoleExperimentsApp.Experiments.EnumerableCollections
         {
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("=== Enumerable Collections Experiments ===");
+            Console.WriteLine("Description: Demonstrating thread-safe and non-thread-safe collection types with performance comparisons.");
             Console.ResetColor();
 
             Console.ForegroundColor = ConsoleColor.Gray;

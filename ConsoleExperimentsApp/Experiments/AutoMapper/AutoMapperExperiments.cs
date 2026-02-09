@@ -12,6 +12,7 @@ namespace ConsoleExperimentsApp.Experiments.AutoMapper
         {
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("=== AutoMapper Experiments ===");
+            Console.WriteLine("Description: Demonstrating object-to-object mapping with AutoMapper including flattening, projections, and custom resolvers.");
             Console.ResetColor();
 
             // Example 1: Basic Mapping

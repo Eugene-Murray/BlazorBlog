@@ -10,7 +10,8 @@ namespace ConsoleExperimentsApp.Experiments.MLNet
     {
         public static async Task Run()
         {
-            Console.WriteLine("=== ML.NET Experiments ===\n");
+            Console.WriteLine("=== ML.NET Experiments ===");
+            Console.WriteLine("Description: Demonstrating machine learning with ML.NET including classification and regression models.\n");
 
             await Task.Run(() =>
             {

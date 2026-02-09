@@ -10,6 +10,7 @@ namespace ConsoleExperimentsApp.Experiments.Generics
         {
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("=== Generics Experiments ===");
+            Console.WriteLine("Description: Demonstrating type-safe generic programming with classes, methods, constraints, and variance.");
             Console.ResetColor();
 
             Console.WriteLine("\n--- 1. Generic Classes ---");

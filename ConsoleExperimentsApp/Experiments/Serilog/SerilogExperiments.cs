@@ -12,7 +12,8 @@ namespace ConsoleExperimentsApp.Experiments.Serilog
         public static async Task Run()
         {
             Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine("SerilogExperiments");
+            Console.WriteLine("=== Serilog Structured Logging Experiments ===");
+            Console.WriteLine("Description: Demonstrating structured logging with Serilog including file sinks and contextual logging.");
             Console.ResetColor();
 
             SerilogFileLogExample();

@@ -11,6 +11,7 @@ namespace ConsoleExperimentsApp.Experiments.ExtensionMethod
         {
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("=== Extension Methods and Blocks Experiments ===");
+            Console.WriteLine("Description: Demonstrating how to extend existing types with new methods without modifying the original code.");
             Console.ResetColor();
 
             // Example 1: Basic Extension Methods on String

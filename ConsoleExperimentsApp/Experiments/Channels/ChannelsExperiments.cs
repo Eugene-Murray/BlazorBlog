@@ -11,7 +11,8 @@ namespace ConsoleExperimentsApp.Experiments.Channels
         public static async Task Run()
         {
             Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine("ChannelsExperiments");
+            Console.WriteLine("=== System.Threading.Channels Experiments ===");
+            Console.WriteLine("Description: Demonstrating producer-consumer patterns using System.Threading.Channels for efficient data flow.");
             Console.ResetColor();
 
             await ChannelExample();

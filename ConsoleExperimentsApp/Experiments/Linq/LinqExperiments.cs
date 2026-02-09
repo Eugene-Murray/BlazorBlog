@@ -11,6 +11,7 @@ namespace ConsoleExperimentsApp.Experiments.Linq
         {
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("=== Linq Experiments ===");
+            Console.WriteLine("Description: Demonstrating Language Integrated Query (LINQ) operators for querying and transforming data collections.");
             Console.ResetColor();
 
             // Sample data

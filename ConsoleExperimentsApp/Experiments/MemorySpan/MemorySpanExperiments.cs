@@ -11,7 +11,8 @@ namespace ConsoleExperimentsApp.Experiments.MemorySpan
         public static async Task Run()
         {
             Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine("MemorySpanExperiments");
+            Console.WriteLine("=== Memory and Span Experiments ===");
+            Console.WriteLine("Description: Demonstrating high-performance memory operations using Span<T>, Memory<T>, and buffer management.");
             Console.ResetColor();
 
             // Run all 20 examples

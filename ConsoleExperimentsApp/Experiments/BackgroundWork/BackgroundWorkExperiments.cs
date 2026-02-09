@@ -9,7 +9,8 @@ namespace ConsoleExperimentsApp.Experiments.BackgroundWork
     {
         public static async Task Run()
         {
-            Console.WriteLine("=== Background Work Experiments ===\n");
+            Console.WriteLine("=== Background Work Experiments ===");
+            Console.WriteLine("Description: Demonstrating BackgroundWorker for executing long-running operations with progress reporting and cancellation.\n");
 
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.WriteLine("Description: Demonstrates basic BackgroundWorker usage for executing long-running");

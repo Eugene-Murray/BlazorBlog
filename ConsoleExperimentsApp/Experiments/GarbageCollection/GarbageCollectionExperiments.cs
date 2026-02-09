@@ -13,7 +13,8 @@ namespace ConsoleExperimentsApp.Experiments.GarbageCollection
             public static async Task Run()
             {
                 Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine("GarbageCollectionExperiments");
+                Console.WriteLine("=== Garbage Collection Experiments ===");
+                Console.WriteLine("Description: Demonstrating .NET garbage collection behavior, memory management, and optimization techniques.");
                 Console.ResetColor();
 
                 // Run all 20 GC examples

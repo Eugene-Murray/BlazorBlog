@@ -12,7 +12,8 @@ namespace ConsoleExperimentsApp.Experiments.Rx
         public static Task Run()
         {
             Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine("RxExperiments");
+            Console.WriteLine("=== Reactive Extensions (Rx.NET) Experiments ===");
+            Console.WriteLine("Description: Demonstrating reactive programming with observables, operators, and event stream composition.");
             Console.ResetColor();
 
             ObservableTimer();

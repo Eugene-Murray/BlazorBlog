@@ -79,6 +79,7 @@ namespace ConsoleExperimentsApp.Experiments.Reflection
         {
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("=== Reflection Experiments ===");
+            Console.WriteLine("Description: Demonstrating runtime type inspection, metadata access, and dynamic invocation using .NET Reflection.");
             Console.ResetColor();
 
             Example1_GetTypeInformation();

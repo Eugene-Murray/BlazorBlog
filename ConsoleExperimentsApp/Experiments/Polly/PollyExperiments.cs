@@ -16,6 +16,7 @@ namespace ConsoleExperimentsApp.Experiments.Polly
         {
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("=== Polly Experiments ===");
+            Console.WriteLine("Description: Demonstrating resilience and transient fault handling with retry, circuit breaker, timeout, and fallback policies.");
             Console.ResetColor();
 
             Console.ForegroundColor = ConsoleColor.Gray;

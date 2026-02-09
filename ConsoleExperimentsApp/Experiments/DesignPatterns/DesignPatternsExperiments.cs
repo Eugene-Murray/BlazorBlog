@@ -10,6 +10,7 @@ namespace ConsoleExperimentsApp.Experiments.DesignPatterns
         {
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("=== Gang of Four Design Patterns Examples ===");
+            Console.WriteLine("Description: Demonstrating classic GoF design patterns including creational, structural, and behavioral patterns.");
             Console.ResetColor();
 
             await RunCreationalPatterns();
