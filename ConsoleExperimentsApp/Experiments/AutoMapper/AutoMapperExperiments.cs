@@ -16,30 +16,58 @@ namespace ConsoleExperimentsApp.Experiments.AutoMapper
 
             // Example 1: Basic Mapping
             Console.WriteLine("\n1. Basic Object-to-Object Mapping:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Demonstrates simple property-to-property mapping between objects");
+            Console.WriteLine("   with matching property names using AutoMapper's convention-based mapping.");
+            Console.ResetColor();
             BasicMapping();
 
             // Example 2: Flattening
             Console.WriteLine("\n2. Flattening Complex Objects:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Shows how AutoMapper can flatten nested objects into a flat structure");
+            Console.WriteLine("   by concatenating property names (e.g., Address.City becomes AddressCity).");
+            Console.ResetColor();
             FlatteningExample();
 
             // Example 3: Custom Value Resolvers
             Console.WriteLine("\n3. Custom Value Resolvers:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Demonstrates using custom value resolvers to implement complex");
+            Console.WriteLine("   mapping logic that goes beyond simple property assignments.");
+            Console.ResetColor();
             CustomValueResolverExample();
 
             // Example 4: Projection with LINQ
             Console.WriteLine("\n4. Projection with LINQ:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Shows how to use AutoMapper with LINQ queries to project");
+            Console.WriteLine("   database entities directly into DTOs for efficient data retrieval.");
+            Console.ResetColor();
             ProjectionExample();
 
             // Example 5: Reverse Mapping
             Console.WriteLine("\n5. Reverse Mapping:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Demonstrates bidirectional mapping using ReverseMap() to map");
+            Console.WriteLine("   from source to destination and vice versa without duplicating configuration.");
+            Console.ResetColor();
             ReverseMappingExample();
 
             // Example 6: Conditional Mapping
             Console.WriteLine("\n6. Conditional Mapping:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Shows how to apply conditions to determine when and how properties");
+            Console.WriteLine("   are mapped, allowing for selective property mapping based on business rules.");
+            Console.ResetColor();
             ConditionalMappingExample();
 
             // Example 7: Collection Mapping
             Console.WriteLine("\n7. Collection Mapping:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Demonstrates mapping collections of objects, including lists, arrays,");
+            Console.WriteLine("   and IEnumerable types while preserving collection types and relationships.");
+            Console.ResetColor();
             CollectionMappingExample();
 
             Console.WriteLine("\n=== AutoMapper Experiments Completed ===");

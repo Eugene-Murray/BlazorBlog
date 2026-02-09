@@ -15,6 +15,10 @@ namespace ConsoleExperimentsApp.Experiments.ExtensionMethod
 
             // Example 1: Basic Extension Methods on String
             Console.WriteLine("\n1. Basic String Extension Methods:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Demonstrates how to extend the built-in string type with custom");
+            Console.WriteLine("   methods like WordCount, ReverseString, and IsPalindrome.");
+            Console.ResetColor();
             string text = "Hello World";
             Console.WriteLine($"Original: {text}");
             Console.WriteLine($"Word Count: {text.WordCount()}");
@@ -24,6 +28,10 @@ namespace ConsoleExperimentsApp.Experiments.ExtensionMethod
 
             // Example 2: Extension Methods on Int
             Console.WriteLine("\n2. Integer Extension Methods:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Shows how to add mathematical and utility methods to integer types");
+            Console.WriteLine("   such as Factorial, IsEven, IsPrime, and Square.");
+            Console.ResetColor();
             int number = 5;
             Console.WriteLine($"{number}! = {number.Factorial()}");
             Console.WriteLine($"Is {number} Even? {number.IsEven()}");
@@ -32,6 +40,10 @@ namespace ConsoleExperimentsApp.Experiments.ExtensionMethod
 
             // Example 3: Extension Methods on Collections
             Console.WriteLine("\n3. Collection Extension Methods:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Demonstrates extending collection types with custom algorithms");
+            Console.WriteLine("   like Median, StandardDeviation, and Shuffle operations.");
+            Console.ResetColor();
             var numbers = new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
             Console.WriteLine($"Original: {string.Join(", ", numbers)}");
             Console.WriteLine($"Median: {numbers.Median()}");
@@ -41,6 +53,10 @@ namespace ConsoleExperimentsApp.Experiments.ExtensionMethod
 
             // Example 4: Extension Methods on Custom Types
             Console.WriteLine("\n4. Extension Methods on Custom Types:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Shows how to extend user-defined classes with additional");
+            Console.WriteLine("   functionality without modifying the original class definition.");
+            Console.ResetColor();
             var person = new PersionExtensions { FirstName = "John", LastName = "Doe", Age = 30 };
             Console.WriteLine(person.GetFullDetails());
             Console.WriteLine($"Is Adult: {person.IsAdult()}");
@@ -48,6 +64,10 @@ namespace ConsoleExperimentsApp.Experiments.ExtensionMethod
 
             // Example 5: Chaining Extension Methods
             Console.WriteLine("\n5. Chaining Extension Methods:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Demonstrates how extension methods that return the same type can be");
+            Console.WriteLine("   chained together to create fluent, readable code.");
+            Console.ResetColor();
             string sentence = "  this is a test sentence  ";
             var result = sentence.Trim()
                                 .ToTitleCase()
@@ -57,6 +77,10 @@ namespace ConsoleExperimentsApp.Experiments.ExtensionMethod
 
             // Example 6: Generic Extension Methods
             Console.WriteLine("\n6. Generic Extension Methods:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Shows how to create extension methods using generic type parameters");
+            Console.WriteLine("   that work with any type while maintaining type safety.");
+            Console.ResetColor();
             var list1 = new List<int> { 1, 2, 3 };
             var list2 = new List<string> { "a", "b", "c" };
             Console.WriteLine($"Int list is null or empty: {list1.IsNullOrEmpty()}");
@@ -65,12 +89,20 @@ namespace ConsoleExperimentsApp.Experiments.ExtensionMethod
 
             // Example 7: Extension Methods on Interfaces
             Console.WriteLine("\n7. Extension Methods on Interfaces:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Demonstrates extending interface types, which applies the extension");
+            Console.WriteLine("   to all implementations of that interface.");
+            Console.ResetColor();
             IEnumerable<int> enumerable = new[] { 1, 2, 3, 4, 5 };
             Console.WriteLine($"Sum using extension: {enumerable.SumValues()}");
             Console.WriteLine($"Comma separated: {enumerable.ToCommaSeparated()}");
 
             // Example 8: Null-Safe Extension Methods
             Console.WriteLine("\n8. Null-Safe Extension Methods:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Shows how to create extension methods that safely handle null values");
+            Console.WriteLine("   using nullable reference types and defensive programming.");
+            Console.ResetColor();
             string? nullString = null;
             string? validString = "test";
             Console.WriteLine($"Null string is null or empty: {nullString.IsNullOrEmpty()}");
@@ -79,6 +111,10 @@ namespace ConsoleExperimentsApp.Experiments.ExtensionMethod
 
             // Example 9: Extension Methods with Multiple Parameters
             Console.WriteLine("\n9. Extension Methods with Multiple Parameters:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Demonstrates extension methods that accept additional parameters");
+            Console.WriteLine("   beyond the 'this' parameter for more complex operations.");
+            Console.ResetColor();
             string template = "Hello, {0}! Welcome to {1}.";
             Console.WriteLine(template.FormatWith("Alice", "C# World"));
             var range = 10.To(20);
@@ -86,10 +122,18 @@ namespace ConsoleExperimentsApp.Experiments.ExtensionMethod
 
             // Example 10: Extension Block Scope (C# 14 feature)
             Console.WriteLine("\n10. Extension Block Scope (C# 14):");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Demonstrates C# 14's extension block feature that allows defining");
+            Console.WriteLine("   extension methods with limited scope, reducing namespace pollution.");
+            Console.ResetColor();
             DemonstrateExtensionBlocks();
 
             // Example 11: Fluent API using Extension Methods
             Console.WriteLine("\n11. Fluent API using Extension Methods:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Shows how to use extension methods to create fluent interfaces");
+            Console.WriteLine("   with method chaining for building objects in a readable way.");
+            Console.ResetColor();
             var fluentResult = FluentBuilder
                 .Create()
                 .WithName("My Object")
@@ -100,6 +144,10 @@ namespace ConsoleExperimentsApp.Experiments.ExtensionMethod
 
             // Example 12: LINQ-style Extension Methods
             Console.WriteLine("\n12. Custom LINQ-style Extension Methods:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Demonstrates creating custom LINQ-like extension methods that provide");
+            Console.WriteLine("   deferred execution and composability for data processing pipelines.");
+            Console.ResetColor();
             var data = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
             var filtered = data.WhereEven().TakeWhileLessThan(7);
             Console.WriteLine($"Even numbers less than 7: {string.Join(", ", filtered)}");

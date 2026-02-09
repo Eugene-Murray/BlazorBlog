@@ -159,12 +159,20 @@ namespace ConsoleExperimentsApp.Experiments.MediatR
             // Example 1: Command Pattern
             Console.WriteLine("\n1️⃣  COMMAND PATTERN EXAMPLE");
             Console.WriteLine("─────────────────────────────");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("Description: Demonstrates using IRequest for commands that modify state");
+            Console.WriteLine("and return a result, following the CQRS command pattern.");
+            Console.ResetColor();
             var userId = await sender.Send(new CreateUserCommand("John Doe", "john@example.com"));
             Console.WriteLine($"Returned User ID: {userId}\n");
 
             // Example 2: Query Pattern
             Console.WriteLine("2️⃣  QUERY PATTERN EXAMPLE");
             Console.WriteLine("─────────────────────────────");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("Description: Shows IRequest for queries that retrieve data without modifying state,");
+            Console.WriteLine("implementing the CQRS query pattern.");
+            Console.ResetColor();
             var user = await sender.Send(new GetUserByIdQuery(userId));
             if (user != null)
             {
@@ -175,6 +183,10 @@ namespace ConsoleExperimentsApp.Experiments.MediatR
             // Example 3: Notification Pattern (One-to-Many)
             Console.WriteLine("3️⃣  NOTIFICATION PATTERN EXAMPLE");
             Console.WriteLine("─────────────────────────────────");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("Description: Demonstrates INotification for publishing events to multiple handlers,");
+            Console.WriteLine("implementing the observer pattern for decoupled event handling.");
+            Console.ResetColor();
             Console.WriteLine("Publishing notification (will trigger multiple handlers):");
             await publisher.Publish(new UserCreatedNotification(userId, "John Doe"));
             Console.WriteLine();
@@ -182,6 +194,10 @@ namespace ConsoleExperimentsApp.Experiments.MediatR
             // Example 4: Stream Request Pattern
             Console.WriteLine("4️⃣  STREAM REQUEST PATTERN EXAMPLE");
             Console.WriteLine("─────────────────────────────────");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("Description: Shows IStreamRequest for returning asynchronous streams of data,");
+            Console.WriteLine("useful for processing large datasets efficiently with IAsyncEnumerable.");
+            Console.ResetColor();
             await foreach (var streamUser in sender.CreateStream(new GetUsersStreamQuery(3)))
             {
                 Console.WriteLine($"  → Received: {streamUser.Name}");
@@ -191,6 +207,10 @@ namespace ConsoleExperimentsApp.Experiments.MediatR
             // Example 5: Pipeline Behaviors Demo
             Console.WriteLine("5️⃣  PIPELINE BEHAVIORS EXAMPLE");
             Console.WriteLine("────────────────────────────────");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("Description: Demonstrates IPipelineBehavior for implementing cross-cutting concerns");
+            Console.WriteLine("like logging, validation, and error handling that run for every request.");
+            Console.ResetColor();
             Console.WriteLine("Notice the [Pipeline] and [Validation] logs above - they run for every request!");
             Console.WriteLine();
 

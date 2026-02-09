@@ -18,11 +18,35 @@ namespace ConsoleExperimentsApp.Experiments.Polly
             Console.WriteLine("=== Polly Experiments ===");
             Console.ResetColor();
 
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("Description: Demonstrates basic retry policies for handling transient failures");
+            Console.WriteLine("by automatically retrying failed operations a specified number of times.");
+            Console.ResetColor();
             await RetryPolicyExample();
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("Description: Shows exponential backoff retry pattern with increasing delays");
+            Console.WriteLine("between retries to reduce load on failing services.");
+            Console.ResetColor();
             await WaitAndRetryExample();
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("Description: Demonstrates the Circuit Breaker pattern that prevents cascading");
+            Console.WriteLine("failures by breaking the circuit after consecutive failures.");
+            Console.ResetColor();
             await CircuitBreakerExample();
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("Description: Shows how to apply timeout policies to prevent operations");
+            Console.WriteLine("from running indefinitely and consuming resources.");
+            Console.ResetColor();
             await TimeoutExample();
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("Description: Demonstrates fallback policies that provide alternative");
+            Console.WriteLine("responses or default values when operations fail.");
+            Console.ResetColor();
             await FallbackExample();
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("Description: Shows how to combine multiple policies (retry, circuit breaker,");
+            Console.WriteLine("timeout, fallback) into a comprehensive resilience strategy.");
+            Console.ResetColor();
             await CombinedPoliciesExample();
 
             Console.ForegroundColor = ConsoleColor.Magenta;

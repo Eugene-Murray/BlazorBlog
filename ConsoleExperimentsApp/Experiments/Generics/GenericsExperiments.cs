@@ -13,21 +13,45 @@ namespace ConsoleExperimentsApp.Experiments.Generics
             Console.ResetColor();
 
             Console.WriteLine("\n--- 1. Generic Classes ---");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Demonstrates creating type-safe generic classes that can work");
+            Console.WriteLine("   with different types while maintaining compile-time type checking.");
+            Console.ResetColor();
             GenericClassExperiment();
 
             Console.WriteLine("\n--- 2. Generic Methods ---");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Shows how to create methods that work with multiple types using");
+            Console.WriteLine("   type parameters, allowing reusable code with type safety.");
+            Console.ResetColor();
             GenericMethodExperiment();
 
             Console.WriteLine("\n--- 3. Generic Constraints ---");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Demonstrates using constraints (where clauses) to restrict type parameters");
+            Console.WriteLine("   to specific base classes, interfaces, or requirements like new(), struct, or class.");
+            Console.ResetColor();
             GenericConstraintsExperiment();
 
             Console.WriteLine("\n--- 4. Covariance and Contravariance ---");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Explains covariance (out) for returning derived types and contravariance");
+            Console.WriteLine("   (in) for accepting base types, enabling flexible type conversions in generic interfaces.");
+            Console.ResetColor();
             CovarianceContravarianceExperiment();
 
             Console.WriteLine("\n--- 5. Multiple Type Parameters ---");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Shows how to use multiple type parameters in a single generic class");
+            Console.WriteLine("   or method, enabling complex type relationships and operations.");
+            Console.ResetColor();
             MultipleTypeParametersExperiment();
 
             Console.WriteLine("\n--- 6. Generic Collections ---");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Demonstrates built-in generic collection types like List<T>, Dictionary<TKey, TValue>,");
+            Console.WriteLine("   and Queue<T> that provide type safety and better performance than non-generic versions.");
+            Console.ResetColor();
             GenericCollectionsExperiment();
 
             Console.ForegroundColor = ConsoleColor.Magenta;

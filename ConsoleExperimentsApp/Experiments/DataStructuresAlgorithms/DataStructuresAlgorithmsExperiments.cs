@@ -13,17 +13,57 @@ namespace ConsoleExperimentsApp.Experiments.DataStructuresAlgorithms
             Console.ResetColor();
 
             // Data Structures
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("Description: Demonstrates the Stack data structure (Last-In-First-Out)");
+            Console.WriteLine("with Push, Pop, and Peek operations.");
+            Console.ResetColor();
             DemoStack();
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("Description: Demonstrates the Queue data structure (First-In-First-Out)");
+            Console.WriteLine("with Enqueue, Dequeue, and Peek operations.");
+            Console.ResetColor();
             DemoQueue();
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("Description: Shows LinkedList operations including AddFirst, AddLast,");
+            Console.WriteLine("and navigation through nodes.");
+            Console.ResetColor();
             DemoLinkedList();
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("Description: Demonstrates Dictionary hash table operations");
+            Console.WriteLine("for key-value pair storage and fast O(1) lookup.");
+            Console.ResetColor();
             DemoDictionary();
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("Description: Demonstrates binary tree structure with insertion");
+            Console.WriteLine("and traversal algorithms (in-order, pre-order, post-order).");
+            Console.ResetColor();
             DemoBinaryTree();
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("Description: Shows graph data structure with vertices and edges,");
+            Console.WriteLine("including depth-first and breadth-first traversal algorithms.");
+            Console.ResetColor();
             DemoGraph();
 
             // Algorithms
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("Description: Demonstrates various sorting algorithms including");
+            Console.WriteLine("Bubble Sort, Quick Sort, Merge Sort with complexity analysis.");
+            Console.ResetColor();
             DemoSortingAlgorithms();
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("Description: Shows different searching algorithms like Binary Search");
+            Console.WriteLine("and Linear Search with time complexity comparisons.");
+            Console.ResetColor();
             DemoSearchingAlgorithms();
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("Description: Demonstrates dynamic programming techniques with examples");
+            Console.WriteLine("like Fibonacci sequence using memoization and tabulation.");
+            Console.ResetColor();
             DemoDynamicProgramming();
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("Description: Shows recursive algorithms including factorial,");
+            Console.WriteLine("Fibonacci, and demonstrates the call stack behavior.");
+            Console.ResetColor();
             DemoRecursion();
 
             Console.ForegroundColor = ConsoleColor.Magenta;

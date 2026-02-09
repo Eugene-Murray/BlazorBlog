@@ -17,21 +17,45 @@ namespace ConsoleExperimentsApp.Experiments.AspectCoding
             Console.ResetColor();
 
             Console.WriteLine("\n1. Logging Aspect with Attributes:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Demonstrates how to use custom attributes and CallerMemberName");
+            Console.WriteLine("   to automatically log method entry and exit points without modifying business logic.");
+            Console.ResetColor();
             await DemoLoggingAspect();
 
             Console.WriteLine("\n2. Performance Measurement Aspect:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Shows how to track method execution time using a disposable");
+            Console.WriteLine("   PerformanceTracker that leverages the using statement for clean timing measurement.");
+            Console.ResetColor();
             await DemoPerformanceAspect();
 
             Console.WriteLine("\n3. Exception Handling Aspect:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Illustrates centralized exception handling patterns using attributes");
+            Console.WriteLine("   to mark methods that require consistent error handling across both sync and async operations.");
+            Console.ResetColor();
             await DemoExceptionHandlingAspect();
 
             Console.WriteLine("\n4. Caching Aspect:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Demonstrates implementing a simple caching layer to avoid expensive");
+            Console.WriteLine("   operations by storing and retrieving results based on method parameters.");
+            Console.ResetColor();
             await DemoCachingAspect();
 
             Console.WriteLine("\n5. Validation Aspect:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Shows how to create custom validation attributes for method parameters");
+            Console.WriteLine("   to enforce business rules like email format, non-empty values, and numeric ranges.");
+            Console.ResetColor();
             await DemoValidationAspect();
 
             Console.WriteLine("\n6. Interceptor Pattern (C# 12+):");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Demonstrates Proxy and Decorator patterns for method interception,");
+            Console.WriteLine("   allowing you to add cross-cutting concerns like logging and timing around method calls.");
+            Console.ResetColor();
             await DemoInterceptorPattern();
 
             Console.ForegroundColor = ConsoleColor.Magenta;

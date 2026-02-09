@@ -29,12 +29,20 @@ namespace ConsoleExperimentsApp.Experiments.DesignPatterns
 
             // 1. Singleton Pattern
             Console.WriteLine("\n1. Singleton Pattern:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Ensures a class has only one instance and provides");
+            Console.WriteLine("   a global point of access to it.");
+            Console.ResetColor();
             var singleton1 = Singleton.Instance;
             var singleton2 = Singleton.Instance;
             Console.WriteLine($"Same instance: {ReferenceEquals(singleton1, singleton2)}");
 
             // 2. Factory Method Pattern
             Console.WriteLine("\n2. Factory Method Pattern:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Defines an interface for creating objects, but lets subclasses");
+            Console.WriteLine("   decide which class to instantiate.");
+            Console.ResetColor();
             var dogCreator = new DogCreator();
             var catCreator = new CatCreator();
             var dog = dogCreator.CreateAnimal();
@@ -44,6 +52,10 @@ namespace ConsoleExperimentsApp.Experiments.DesignPatterns
 
             // 3. Abstract Factory Pattern
             Console.WriteLine("\n3. Abstract Factory Pattern:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Provides an interface for creating families of related");
+            Console.WriteLine("   or dependent objects without specifying their concrete classes.");
+            Console.ResetColor();
             var modernFactory = new ModernFurnitureFactory();
             var chair = modernFactory.CreateChair();
             var table = modernFactory.CreateTable();
@@ -52,6 +64,10 @@ namespace ConsoleExperimentsApp.Experiments.DesignPatterns
 
             // 4. Builder Pattern
             Console.WriteLine("\n4. Builder Pattern:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Separates the construction of a complex object from its representation");
+            Console.WriteLine("   allowing the same construction process to create different representations.");
+            Console.ResetColor();
             var house = new HouseBuilder()
                 .SetFoundation("Concrete")
                 .SetWalls("Brick")
@@ -61,6 +77,10 @@ namespace ConsoleExperimentsApp.Experiments.DesignPatterns
 
             // 5. Prototype Pattern
             Console.WriteLine("\n5. Prototype Pattern:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Creates new objects by cloning an existing object (prototype)");
+            Console.WriteLine("   rather than creating new instances from scratch.");
+            Console.ResetColor();
             var originalDocument = new Document("Original", "Content here");
             var clonedDocument = originalDocument.Clone();
             Console.WriteLine($"Original: {originalDocument}");
@@ -75,12 +95,20 @@ namespace ConsoleExperimentsApp.Experiments.DesignPatterns
 
             // 1. Adapter Pattern
             Console.WriteLine("\n1. Adapter Pattern:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Converts the interface of a class into another interface clients expect,");
+            Console.WriteLine("   allowing incompatible interfaces to work together.");
+            Console.ResetColor();
             var adaptee = new Adaptee();
             var adapter = new Adapter(adaptee);
             adapter.Request();
 
             // 2. Bridge Pattern
             Console.WriteLine("\n2. Bridge Pattern:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Decouples an abstraction from its implementation so that");
+            Console.WriteLine("   the two can vary independently.");
+            Console.ResetColor();
             var redCircle = new Circle(new RedColor());
             var blueSquare = new Square(new BlueColor());
             redCircle.Draw();
@@ -88,6 +116,10 @@ namespace ConsoleExperimentsApp.Experiments.DesignPatterns
 
             // 3. Composite Pattern
             Console.WriteLine("\n3. Composite Pattern:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Composes objects into tree structures to represent part-whole hierarchies,");
+            Console.WriteLine("   letting clients treat individual objects and compositions uniformly.");
+            Console.ResetColor();
             var root = new CompositeComponent("Root");
             var branch1 = new CompositeComponent("Branch1");
             var leaf1 = new LeafComponent("Leaf1");
@@ -99,6 +131,10 @@ namespace ConsoleExperimentsApp.Experiments.DesignPatterns
 
             // 4. Decorator Pattern
             Console.WriteLine("\n4. Decorator Pattern:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Attaches additional responsibilities to an object dynamically,");
+            Console.WriteLine("   providing a flexible alternative to subclassing for extending functionality.");
+            Console.ResetColor();
             var coffee = new SimpleCoffee();
             var milkCoffee = new MilkDecorator(coffee);
             var sugarMilkCoffee = new SugarDecorator(milkCoffee);
@@ -106,11 +142,19 @@ namespace ConsoleExperimentsApp.Experiments.DesignPatterns
 
             // 5. Facade Pattern
             Console.WriteLine("\n5. Facade Pattern:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Provides a unified interface to a set of interfaces in a subsystem,");
+            Console.WriteLine("   making the subsystem easier to use.");
+            Console.ResetColor();
             var facade = new ComputerFacade();
             facade.Start();
 
             // 6. Flyweight Pattern
             Console.WriteLine("\n6. Flyweight Pattern:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Uses sharing to support large numbers of fine-grained objects efficiently");
+            Console.WriteLine("   by sharing common state between multiple objects.");
+            Console.ResetColor();
             var factory = new TreeTypeFactory();
             var tree1 = factory.GetTreeType("Oak", "Green", "OakTexture");
             var tree2 = factory.GetTreeType("Pine", "Dark Green", "PineTexture");
@@ -119,6 +163,10 @@ namespace ConsoleExperimentsApp.Experiments.DesignPatterns
 
             // 7. Proxy Pattern
             Console.WriteLine("\n7. Proxy Pattern:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Provides a surrogate or placeholder for another object");
+            Console.WriteLine("   to control access, add lazy initialization, or implement caching.");
+            Console.ResetColor();
             var proxy = new ImageProxy("photo.jpg");
             proxy.Display(); // First call loads the image
             proxy.Display(); // Second call uses cached image
@@ -132,6 +180,10 @@ namespace ConsoleExperimentsApp.Experiments.DesignPatterns
 
             // 1. Chain of Responsibility Pattern
             Console.WriteLine("\n1. Chain of Responsibility Pattern:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Passes a request along a chain of handlers where each handler decides");
+            Console.WriteLine("   whether to process the request or pass it to the next handler in the chain.");
+            Console.ResetColor();
             var manager = new Manager();
             var director = new Director();
             var vp = new VP();
@@ -143,6 +195,10 @@ namespace ConsoleExperimentsApp.Experiments.DesignPatterns
 
             // 2. Command Pattern
             Console.WriteLine("\n2. Command Pattern:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Encapsulates a request as an object, allowing parameterization of clients");
+            Console.WriteLine("   with different requests, and support for undoable operations.");
+            Console.ResetColor();
             var light = new Light();
             var turnOn = new TurnOnCommand(light);
             var turnOff = new TurnOffCommand(light);
@@ -154,6 +210,10 @@ namespace ConsoleExperimentsApp.Experiments.DesignPatterns
 
             // 3. Interpreter Pattern
             Console.WriteLine("\n3. Interpreter Pattern:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Defines a representation for a language's grammar along with");
+            Console.WriteLine("   an interpreter that uses the representation to interpret sentences in the language.");
+            Console.ResetColor();
             var context = new Context();
             context.SetVariable("x", 5);
             context.SetVariable("y", 3);
@@ -164,6 +224,10 @@ namespace ConsoleExperimentsApp.Experiments.DesignPatterns
 
             // 4. Iterator Pattern
             Console.WriteLine("\n4. Iterator Pattern:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Provides a way to access elements of a collection sequentially");
+            Console.WriteLine("   without exposing its underlying representation.");
+            Console.ResetColor();
             var collection = new ConcreteAggregate();
             collection.Add("Item 1");
             collection.Add("Item 2");
@@ -176,6 +240,10 @@ namespace ConsoleExperimentsApp.Experiments.DesignPatterns
 
             // 5. Mediator Pattern
             Console.WriteLine("\n5. Mediator Pattern:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Defines an object that encapsulates how a set of objects interact,");
+            Console.WriteLine("   promoting loose coupling by keeping objects from referring to each other explicitly.");
+            Console.ResetColor();
             var mediator = new ConcreteMediator();
             var colleague1 = new ConcreteColleague1(mediator);
             var colleague2 = new ConcreteColleague2(mediator);
@@ -186,6 +254,10 @@ namespace ConsoleExperimentsApp.Experiments.DesignPatterns
 
             // 6. Memento Pattern
             Console.WriteLine("\n6. Memento Pattern:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Captures and externalizes an object's internal state");
+            Console.WriteLine("   so it can be restored later without violating encapsulation.");
+            Console.ResetColor();
             var originator = new Originator();
             var caretaker = new Caretaker();
             originator.SetState("State 1");
@@ -197,6 +269,10 @@ namespace ConsoleExperimentsApp.Experiments.DesignPatterns
 
             // 7. Observer Pattern
             Console.WriteLine("\n7. Observer Pattern:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Defines a one-to-many dependency between objects so that when one object");
+            Console.WriteLine("   changes state, all its dependents are notified and updated automatically.");
+            Console.ResetColor();
             var subject = new ConcreteSubject();
             var observer1 = new ConcreteObserver("Observer1");
             var observer2 = new ConcreteObserver("Observer2");
@@ -206,6 +282,10 @@ namespace ConsoleExperimentsApp.Experiments.DesignPatterns
 
             // 8. State Pattern
             Console.WriteLine("\n8. State Pattern:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Allows an object to alter its behavior when its internal state changes,");
+            Console.WriteLine("   appearing to change its class.");
+            Console.ResetColor();
             var trafficLight = new TrafficLightContext();
             trafficLight.Request(); // Red -> Green
             trafficLight.Request(); // Green -> Yellow
@@ -213,6 +293,10 @@ namespace ConsoleExperimentsApp.Experiments.DesignPatterns
 
             // 9. Strategy Pattern
             Console.WriteLine("\n9. Strategy Pattern:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Defines a family of algorithms, encapsulates each one, and makes them");
+            Console.WriteLine("   interchangeable, letting the algorithm vary independently from clients that use it.");
+            Console.ResetColor();
             var shoppingCart = new ShoppingCart();
             shoppingCart.SetPaymentStrategy(new CreditCardPayment());
             shoppingCart.Checkout(100);
@@ -221,6 +305,10 @@ namespace ConsoleExperimentsApp.Experiments.DesignPatterns
 
             // 10. Template Method Pattern
             Console.WriteLine("\n10. Template Method Pattern:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Defines the skeleton of an algorithm in a method, deferring some steps");
+            Console.WriteLine("   to subclasses without changing the algorithm's structure.");
+            Console.ResetColor();
             var tea = new Tea();
             var coffee = new Coffee();
             Console.WriteLine("Making tea:");
@@ -230,6 +318,10 @@ namespace ConsoleExperimentsApp.Experiments.DesignPatterns
 
             // 11. Visitor Pattern
             Console.WriteLine("\n11. Visitor Pattern:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("   Description: Represents an operation to be performed on elements of an object structure,");
+            Console.WriteLine("   letting you define new operations without changing the classes of the elements.");
+            Console.ResetColor();
             var elements = new List<IElement> { new ConcreteElementA(), new ConcreteElementB() };
             var visitor = new ConcreteVisitor();
             foreach (var element in elements)

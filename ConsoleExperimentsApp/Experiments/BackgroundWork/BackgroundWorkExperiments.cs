@@ -11,12 +11,24 @@ namespace ConsoleExperimentsApp.Experiments.BackgroundWork
         {
             Console.WriteLine("=== Background Work Experiments ===\n");
 
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("Description: Demonstrates basic BackgroundWorker usage for executing long-running");
+            Console.WriteLine("operations on a separate thread without blocking the UI thread.");
+            Console.ResetColor();
             await Experiment1_BasicBackgroundWorker();
             Console.WriteLine();
 
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("Description: Shows how to report progress from a background operation using");
+            Console.WriteLine("the ProgressChanged event to provide feedback to the user.");
+            Console.ResetColor();
             await Experiment2_WithProgressReporting();
             Console.WriteLine();
 
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("Description: Demonstrates how to implement cancellation support in BackgroundWorker");
+            Console.WriteLine("allowing users to stop long-running operations gracefully.");
+            Console.ResetColor();
             await Experiment3_WithCancellation();
             Console.WriteLine();
 

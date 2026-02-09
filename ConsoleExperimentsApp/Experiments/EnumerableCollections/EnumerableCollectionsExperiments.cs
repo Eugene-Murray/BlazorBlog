@@ -15,9 +15,25 @@ namespace ConsoleExperimentsApp.Experiments.EnumerableCollections
             Console.WriteLine("=== Enumerable Collections Experiments ===");
             Console.ResetColor();
 
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("Description: Demonstrates the behavior and usage of standard .NET collections");
+            Console.WriteLine("that are NOT thread-safe: List, Dictionary, HashSet, Queue, Stack, LinkedList, etc.");
+            Console.ResetColor();
             await DemonstrateNonThreadSafeCollections();
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("Description: Shows the concurrent collection types that provide thread-safe operations");
+            Console.WriteLine("without explicit locking: ConcurrentQueue, ConcurrentBag, ConcurrentDictionary, BlockingCollection.");
+            Console.ResetColor();
             await DemonstrateThreadSafeCollections();
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("Description: Compares the performance characteristics of thread-safe vs non-thread-safe");
+            Console.WriteLine("collections under various workloads to understand the trade-offs.");
+            Console.ResetColor();
             await ComparePerformanceThreadSafeVsNonThreadSafe();
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("Description: Demonstrates practical multi-threaded scenarios using concurrent collections");
+            Console.WriteLine("to show how they handle parallel operations safely and efficiently.");
+            Console.ResetColor();
             await DemonstrateConcurrentOperations();
 
             Console.ForegroundColor = ConsoleColor.Magenta;

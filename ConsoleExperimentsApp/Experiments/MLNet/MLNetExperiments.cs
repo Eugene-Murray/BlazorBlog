@@ -14,8 +14,16 @@ namespace ConsoleExperimentsApp.Experiments.MLNet
 
             await Task.Run(() =>
             {
+                Console.ForegroundColor = ConsoleColor.Gray;
+                Console.WriteLine("Description: Demonstrates binary classification using ML.NET to predict sentiment");
+                Console.WriteLine("(positive/negative) from text reviews using logistic regression.");
+                Console.ResetColor();
                 SentimentAnalysisExample();
                 Console.WriteLine();
+                Console.ForegroundColor = ConsoleColor.Gray;
+                Console.WriteLine("Description: Shows regression analysis using ML.NET to predict house prices");
+                Console.WriteLine("based on features like size and number of bedrooms.");
+                Console.ResetColor();
                 PricePredictionExample();
             });
 
