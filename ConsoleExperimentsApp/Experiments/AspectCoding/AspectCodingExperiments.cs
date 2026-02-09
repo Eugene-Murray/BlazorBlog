@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 
 namespace ConsoleExperimentsApp.Experiments.AspectCoding
 {
-    public class AspectCodingExperiments
+    public static class AspectCodingExperiments
     {
         public static async Task Run()
         {
