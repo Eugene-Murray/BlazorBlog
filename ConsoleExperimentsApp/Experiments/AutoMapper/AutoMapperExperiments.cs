@@ -76,8 +76,8 @@ namespace ConsoleExperimentsApp.Experiments.AutoMapper
 
         private static void BasicMapping()
         {
-            var config = new MapperConfiguration(cfg => cfg.AddProfile<BasicMappingProfile>());
-            var mapper = config.CreateMapper();
+            var profile = new BasicMappingProfile();
+            var mapper = new Mapper((IConfigurationProvider)profile);
 
             var employee = new EmployeeAutoMapper
             {
@@ -100,8 +100,8 @@ namespace ConsoleExperimentsApp.Experiments.AutoMapper
 
         private static void FlatteningExample()
         {
-            var config = new MapperConfiguration(cfg => cfg.AddProfile<FlatteningProfile>());
-            var mapper = config.CreateMapper();
+            var profile = new FlatteningProfile();
+            var mapper = new Mapper((IConfigurationProvider)profile);
 
             var customer = new Customer
             {
@@ -131,8 +131,8 @@ namespace ConsoleExperimentsApp.Experiments.AutoMapper
 
         private static void CustomValueResolverExample()
         {
-            var config = new MapperConfiguration(cfg => cfg.AddProfile<ProductMappingProfile>());
-            var mapper = config.CreateMapper();
+            var profile = new ProductMappingProfile();
+            var mapper = new Mapper((IConfigurationProvider)profile);
 
             var product = new Product
             {
@@ -154,8 +154,8 @@ namespace ConsoleExperimentsApp.Experiments.AutoMapper
 
         private static void ProjectionExample()
         {
-            var config = new MapperConfiguration(cfg => cfg.AddProfile<OrderMappingProfile>());
-            var mapper = config.CreateMapper();
+            var profile = new OrderMappingProfile();
+            var mapper = new Mapper((IConfigurationProvider)profile);
 
             var orders = new List<Order>
             {
@@ -174,8 +174,8 @@ namespace ConsoleExperimentsApp.Experiments.AutoMapper
 
         private static void ReverseMappingExample()
         {
-            var config = new MapperConfiguration(cfg => cfg.AddProfile<BookMappingProfile>());
-            var mapper = config.CreateMapper();
+            var profile = new BookMappingProfile();
+            var mapper = new Mapper((IConfigurationProvider)profile);
 
             var book = new Book
             {
@@ -198,8 +198,8 @@ namespace ConsoleExperimentsApp.Experiments.AutoMapper
 
         private static void ConditionalMappingExample()
         {
-            var config = new MapperConfiguration(cfg => cfg.AddProfile<UserMappingProfile>());
-            var mapper = config.CreateMapper();
+            var profile = new UserMappingProfile();
+            var mapper = new Mapper((IConfigurationProvider)profile);
 
             var user1 = new User
             {
@@ -228,8 +228,8 @@ namespace ConsoleExperimentsApp.Experiments.AutoMapper
 
         private static void CollectionMappingExample()
         {
-            var config = new MapperConfiguration(cfg => cfg.AddProfile<StudentMappingProfile>());
-            var mapper = config.CreateMapper();
+            var profile = new StudentMappingProfile();
+            var mapper = new Mapper((IConfigurationProvider)profile);
 
             var students = new List<Student>
             {
