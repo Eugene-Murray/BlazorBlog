@@ -122,6 +122,9 @@ while (running)
         case "27":
             await AzureServiceBusExperiments.Run();
             break;
+        case "28":
+            await AzureCosmosDBExperiments.Run();
+            break;
         case "0":
         case "exit":
         case "quit":
@@ -178,6 +181,7 @@ static void DisplayMenu()
     Console.WriteLine(" 25. RabbitMQ Experiments");
     Console.WriteLine(" 26. NServiceBus Experiments");
     Console.WriteLine(" 27. Azure ServiceBus Experiments");
+    Console.WriteLine(" 28. Azure CosmosDB Experiments");
     Console.WriteLine();
     Console.ForegroundColor = ConsoleColor.Cyan;
     Console.WriteLine(" 0.  Exit");
