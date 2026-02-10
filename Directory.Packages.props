@@ -6,6 +6,7 @@
     <PackageVersion Include="AutoMapper" Version="16.0.0" />
     <PackageVersion Include="Azure.Messaging.ServiceBus" Version="7.20.1" />
     <PackageVersion Include="Azure.Messaging.Cosmos" Version="3.57.0" />
+    <PackageVersion Include="Microsoft.ApplicationInsights" Version="3.0.0" />
     <PackageVersion Include="Fluxor" Version="6.9.0" />
     <PackageVersion Include="Fluxor.Blazor.Web" Version="6.9.0" />
     <PackageVersion Include="Fluxor.Blazor.Web.ReduxDevTools" Version="6.9.0" />

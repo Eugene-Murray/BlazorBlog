@@ -125,6 +125,9 @@ while (running)
         case "28":
             await AzureCosmosDBExperiments.Run();
             break;
+        case "29":
+            await AzureAppInsightsExperiments.Run();
+            break;
         case "0":
         case "exit":
         case "quit":
@@ -182,6 +185,7 @@ static void DisplayMenu()
     Console.WriteLine(" 26. NServiceBus Experiments");
     Console.WriteLine(" 27. Azure ServiceBus Experiments");
     Console.WriteLine(" 28. Azure CosmosDB Experiments");
+    Console.WriteLine(" 29. Azure AppInsights Experiments");
     Console.WriteLine();
     Console.ForegroundColor = ConsoleColor.Cyan;
     Console.WriteLine(" 0.  Exit");
