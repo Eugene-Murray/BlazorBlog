@@ -338,7 +338,7 @@ namespace ConsoleExperimentsApp.Experiments.DesignPatterns
     public class Singleton
     {
         private static Singleton? _instance;
-        private static readonly object _lock = new object();
+        private static readonly Lock _lock = new Lock();
 
         private Singleton() { }
 

@@ -1,29 +1,30 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
-using ConsoleExperimentsApp.Experiments.Rx;
-using ConsoleExperimentsApp.Experiments.Serilog;
-using ConsoleExperimentsApp.Experiments.EntityFramework;
-using ConsoleExperimentsApp.Experiments.TPL;
 using ConsoleExperimentsApp.Experiments.AspectCoding;
 using ConsoleExperimentsApp.Experiments.AutoMapper;
+using ConsoleExperimentsApp.Experiments.Azure;
 using ConsoleExperimentsApp.Experiments.BackgroundWork;
 using ConsoleExperimentsApp.Experiments.Channels;
 using ConsoleExperimentsApp.Experiments.CQRS;
+using ConsoleExperimentsApp.Experiments.CSharpVersions;
+using ConsoleExperimentsApp.Experiments.DataStructuresAlgorithms;
 using ConsoleExperimentsApp.Experiments.DesignPatterns;
+using ConsoleExperimentsApp.Experiments.EntityFramework;
 using ConsoleExperimentsApp.Experiments.EnumerableCollections;
 using ConsoleExperimentsApp.Experiments.ExtensionMethod;
 using ConsoleExperimentsApp.Experiments.GarbageCollection;
 using ConsoleExperimentsApp.Experiments.Generics;
 using ConsoleExperimentsApp.Experiments.Linq;
+using ConsoleExperimentsApp.Experiments.MediatR;
 using ConsoleExperimentsApp.Experiments.MemorySpan;
 using ConsoleExperimentsApp.Experiments.MLNet;
-using ConsoleExperimentsApp.Experiments.Reflection;
-using ConsoleExperimentsApp.Experiments.CSharpVersions;
-using ConsoleExperimentsApp.Experiments.MediatR;
-using ConsoleExperimentsApp.Experiments.Polly;
-using ConsoleExperimentsApp.Experiments.DataStructuresAlgorithms;
-using ConsoleExperimentsApp.Experiments.RabbitMQ;
 using ConsoleExperimentsApp.Experiments.NServiceBus;
+using ConsoleExperimentsApp.Experiments.Polly;
+using ConsoleExperimentsApp.Experiments.RabbitMQ;
+using ConsoleExperimentsApp.Experiments.Reflection;
+using ConsoleExperimentsApp.Experiments.Rx;
+using ConsoleExperimentsApp.Experiments.Serilog;
+using ConsoleExperimentsApp.Experiments.TPL;
 
 Console.ForegroundColor = ConsoleColor.White;
 Console.WriteLine("######## .Net C# Experiments ##########");
@@ -118,6 +119,9 @@ while (running)
         case "26":
             await NServiceBusExperiments.Run();
             break;
+        case "27":
+            await AzureServiceBusExperiments.Run();
+            break;
         case "0":
         case "exit":
         case "quit":
@@ -173,6 +177,7 @@ static void DisplayMenu()
     Console.WriteLine(" 24. Data Structures & Algorithms Experiments");
     Console.WriteLine(" 25. RabbitMQ Experiments");
     Console.WriteLine(" 26. NServiceBus Experiments");
+    Console.WriteLine(" 27. Azure ServiceBus Experiments");
     Console.WriteLine();
     Console.ForegroundColor = ConsoleColor.Cyan;
     Console.WriteLine(" 0.  Exit");

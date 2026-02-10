@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" />
+    <PackageReference Include="Azure.Messaging.ServiceBus" />
     <PackageReference Include="Microsoft.ML" />
     <PackageReference Include="NServiceBus" />
     <PackageReference Include="Polly" />
