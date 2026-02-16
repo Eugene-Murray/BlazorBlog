@@ -1,101 +1,185 @@
 @page "/duelgridgame"
 @rendermode InteractiveAuto
+@using Microsoft.AspNetCore.SignalR.Client
+@inject NavigationManager Navigation
+@implements IAsyncDisposable
 
-<PageTitle>Duel Grid Game</PageTitle>
+<PageTitle>Duel Grid Game - Multiplayer</PageTitle>
 
-<h1>Duel Grid Game</h1>
+<h1>Duel Grid Game - Multiplayer</h1>
 
 <div class="game-container">
-    <div class="game-info">
-        <p>Player: <strong>@currentPlayer</strong></p>
-        <p>Status: <strong>@gameStatus</strong></p>
-    </div>
-
-    <div class="grid">
-        @for (int i = 0; i < 9; i++)
-        {
-            int index = i;
-            <button class="grid-cell @GetCellClass(index)" 
-                    @onclick="() => MakeMove(index)"
-                    disabled="@IsGameOver()">
-                @grid[index]
-            </button>
-        }
-    </div>
-
-    @if (IsGameOver())
+    @if (hubConnection?.State != HubConnectionState.Connected)
     {
-        <button class="btn btn-primary mt-3" @onclick="ResetGame">New Game</button>
+        <div class="connection-panel">
+            <h3>Connect to Game</h3>
+            <button class="btn btn-primary" @onclick="CreateRoom" disabled="@isConnecting">Create New Game</button>
+            <div class="join-section">
+                <input type="text" class="form-control" @bind="roomIdToJoin" placeholder="Enter Room ID" maxlength="6" />
+                <button class="btn btn-success" @onclick="JoinRoom" disabled="@(isConnecting || string.IsNullOrWhiteSpace(roomIdToJoin))">Join Game</button>
+            </div>
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="alert alert-danger mt-3">@errorMessage</div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="game-info">
+            <p>Room ID: <strong class="room-id">@currentRoomId</strong></p>
+            <p>You are: <strong class="@($"player-{yourSymbol.ToLower()}")">@yourSymbol</strong></p>
+            <p>Current Turn: <strong>@currentPlayer</strong></p>
+            <p>Status: <strong>@gameStatus</strong></p>
+        </div>
+
+        <div class="grid">
+            @for (int i = 0; i < 9; i++)
+            {
+                int index = i;
+                <button class="grid-cell @GetCellClass(index)" 
+                        @onclick="() => MakeMove(index)"
+                        disabled="@(!CanMakeMove())">
+                    @grid[index]
+                </button>
+            }
+        </div>
+
+        @if (IsGameOver())
+        {
+            <button class="btn btn-primary mt-3" @onclick="ResetGame">New Game</button>
+        }
+
+        <button class="btn btn-secondary mt-3" @onclick="LeaveGame">Leave Game</button>
     }
 </div>
 
 @code {
+    private HubConnection? hubConnection;
     private string[] grid = new string[9];
     private string currentPlayer = "X";
-    private string gameStatus = "Game in progress";
+    private string gameStatus = "Connect to start playing";
+    private string yourSymbol = "";
+    private string currentRoomId = "";
+    private string roomIdToJoin = "";
+    private string errorMessage = "";
+    private bool isConnecting = false;
 
-    protected override void OnInitialized()
+    private async Task CreateRoom()
     {
-        ResetGame();
-    }
-
-    private void MakeMove(int index)
-    {
-        if (string.IsNullOrEmpty(grid[index]) && !IsGameOver())
+        try
         {
-            grid[index] = currentPlayer;
-            
-            if (CheckWinner())
-            {
-                gameStatus = $"Player {currentPlayer} wins!";
-            }
-            else if (IsBoardFull())
-            {
-                gameStatus = "It's a draw!";
-            }
-            else
-            {
-                currentPlayer = currentPlayer == "X" ? "O" : "X";
-                gameStatus = "Game in progress";
-            }
+            isConnecting = true;
+            errorMessage = "";
+            await InitializeSignalR();
+
+            var roomInfo = await hubConnection!.InvokeAsync<GameRoomInfo>("CreateRoom");
+            currentRoomId = roomInfo.RoomId;
+            yourSymbol = roomInfo.YourSymbol;
+            gameStatus = roomInfo.Status;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Failed to create room: {ex.Message}";
+        }
+        finally
+        {
+            isConnecting = false;
         }
     }
 
-    private bool CheckWinner()
+    private async Task JoinRoom()
     {
-        int[][] winPatterns = new int[][]
+        try
         {
-            new int[] { 0, 1, 2 },
-            new int[] { 3, 4, 5 },
-            new int[] { 6, 7, 8 },
-            new int[] { 0, 3, 6 },
-            new int[] { 1, 4, 7 },
-            new int[] { 2, 5, 8 },
-            new int[] { 0, 4, 8 },
-            new int[] { 2, 4, 6 }
-        };
+            isConnecting = true;
+            errorMessage = "";
+            await InitializeSignalR();
 
-        foreach (var pattern in winPatterns)
-        {
-            if (!string.IsNullOrEmpty(grid[pattern[0]]) &&
-                grid[pattern[0]] == grid[pattern[1]] &&
-                grid[pattern[1]] == grid[pattern[2]])
+            var roomInfo = await hubConnection!.InvokeAsync<GameRoomInfo?>("JoinRoom", roomIdToJoin);
+
+            if (roomInfo == null)
             {
-                return true;
+                errorMessage = "Room not found or already full!";
+                await hubConnection.StopAsync();
+                hubConnection = null;
+                return;
             }
-        }
 
-        return false;
+            currentRoomId = roomInfo.RoomId;
+            yourSymbol = roomInfo.YourSymbol;
+            gameStatus = roomInfo.Status;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Failed to join room: {ex.Message}";
+        }
+        finally
+        {
+            isConnecting = false;
+        }
     }
 
-    private bool IsBoardFull()
+    private async Task InitializeSignalR()
     {
-        return grid.All(cell => !string.IsNullOrEmpty(cell));
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(Navigation.ToAbsoluteUri("/gamehub"))
+            .Build();
+
+        hubConnection.On("GameStarted", () =>
+        {
+            gameStatus = "Game started! Your turn.";
+            InvokeAsync(StateHasChanged);
+        });
+
+        hubConnection.On<int, string, string>("MoveMade", (index, symbol, nextTurn) =>
+        {
+            grid[index] = symbol;
+            currentPlayer = nextTurn;
+            gameStatus = nextTurn == yourSymbol ? "Your turn" : "Opponent's turn";
+            InvokeAsync(StateHasChanged);
+        });
+
+        hubConnection.On<string, string[]>("GameOver", (status, finalGrid) =>
+        {
+            gameStatus = status;
+            grid = finalGrid;
+            InvokeAsync(StateHasChanged);
+        });
+
+        hubConnection.On("GameReset", () =>
+        {
+            grid = new string[9];
+            currentPlayer = "X";
+            gameStatus = "Game in progress";
+            InvokeAsync(StateHasChanged);
+        });
+
+        hubConnection.On("PlayerDisconnected", () =>
+        {
+            gameStatus = "Opponent disconnected!";
+            InvokeAsync(StateHasChanged);
+        });
+
+        await hubConnection.StartAsync();
+    }
+
+    private async Task MakeMove(int index)
+    {
+        if (hubConnection?.State == HubConnectionState.Connected && CanMakeMove() && string.IsNullOrEmpty(grid[index]))
+        {
+            await hubConnection.InvokeAsync("MakeMove", index);
+        }
+    }
+
+    private bool CanMakeMove()
+    {
+        return !IsGameOver() && currentPlayer == yourSymbol && !string.IsNullOrEmpty(yourSymbol);
     }
 
     private bool IsGameOver()
     {
-        return gameStatus != "Game in progress";
+        return gameStatus.Contains("wins") || gameStatus.Contains("draw") || gameStatus.Contains("disconnected");
     }
 
     private string GetCellClass(int index)
@@ -107,11 +191,45 @@
         return "";
     }
 
-    private void ResetGame()
+    private async Task ResetGame()
     {
+        if (hubConnection?.State == HubConnectionState.Connected)
+        {
+            await hubConnection.InvokeAsync("ResetGame");
+        }
+    }
+
+    private async Task LeaveGame()
+    {
+        if (hubConnection != null)
+        {
+            await hubConnection.StopAsync();
+            await hubConnection.DisposeAsync();
+            hubConnection = null;
+        }
+
         grid = new string[9];
         currentPlayer = "X";
-        gameStatus = "Game in progress";
+        gameStatus = "Connect to start playing";
+        yourSymbol = "";
+        currentRoomId = "";
+        roomIdToJoin = "";
+        errorMessage = "";
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (hubConnection != null)
+        {
+            await hubConnection.DisposeAsync();
+        }
+    }
+
+    private class GameRoomInfo
+    {
+        public string RoomId { get; set; } = string.Empty;
+        public string YourSymbol { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
     }
 }
 
@@ -122,9 +240,52 @@
         padding: 20px;
     }
 
+    .connection-panel {
+        text-align: center;
+        padding: 30px;
+        background: #f8f9fa;
+        border-radius: 10px;
+    }
+
+    .connection-panel h3 {
+        margin-bottom: 20px;
+    }
+
+    .connection-panel .btn {
+        margin: 10px 0;
+        width: 100%;
+    }
+
+    .join-section {
+        margin-top: 20px;
+        display: flex;
+        gap: 10px;
+        flex-direction: column;
+    }
+
+    .join-section input {
+        text-align: center;
+        text-transform: uppercase;
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+
     .game-info {
         margin-bottom: 20px;
         text-align: center;
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+    }
+
+    .game-info p {
+        margin: 5px 0;
+    }
+
+    .room-id {
+        color: #007bff;
+        font-size: 1.5rem;
+        letter-spacing: 2px;
     }
 
     .grid {
@@ -160,5 +321,13 @@
 
     .grid-cell.player-o {
         color: #3498db;
+    }
+
+    .btn {
+        width: 100%;
+    }
+
+    .alert {
+        margin-top: 15px;
     }
 </style>

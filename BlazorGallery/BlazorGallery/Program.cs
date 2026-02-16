@@ -1,5 +1,6 @@
 using BlazorGallery.Client.Pages;
 using BlazorGallery.Components;
+using BlazorGallery.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +8,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
+
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
@@ -27,6 +30,7 @@ app.UseHttpsRedirection();
 app.UseAntiforgery();
 
 app.MapStaticAssets();
+app.MapHub<GameHub>("/gamehub");
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()
