@@ -1,0 +1,164 @@
+@page "/duelgridgame"
+@rendermode InteractiveAuto
+
+<PageTitle>Duel Grid Game</PageTitle>
+
+<h1>Duel Grid Game</h1>
+
+<div class="game-container">
+    <div class="game-info">
+        <p>Player: <strong>@currentPlayer</strong></p>
+        <p>Status: <strong>@gameStatus</strong></p>
+    </div>
+
+    <div class="grid">
+        @for (int i = 0; i < 9; i++)
+        {
+            int index = i;
+            <button class="grid-cell @GetCellClass(index)" 
+                    @onclick="() => MakeMove(index)"
+                    disabled="@IsGameOver()">
+                @grid[index]
+            </button>
+        }
+    </div>
+
+    @if (IsGameOver())
+    {
+        <button class="btn btn-primary mt-3" @onclick="ResetGame">New Game</button>
+    }
+</div>
+
+@code {
+    private string[] grid = new string[9];
+    private string currentPlayer = "X";
+    private string gameStatus = "Game in progress";
+
+    protected override void OnInitialized()
+    {
+        ResetGame();
+    }
+
+    private void MakeMove(int index)
+    {
+        if (string.IsNullOrEmpty(grid[index]) && !IsGameOver())
+        {
+            grid[index] = currentPlayer;
+            
+            if (CheckWinner())
+            {
+                gameStatus = $"Player {currentPlayer} wins!";
+            }
+            else if (IsBoardFull())
+            {
+                gameStatus = "It's a draw!";
+            }
+            else
+            {
+                currentPlayer = currentPlayer == "X" ? "O" : "X";
+                gameStatus = "Game in progress";
+            }
+        }
+    }
+
+    private bool CheckWinner()
+    {
+        int[][] winPatterns = new int[][]
+        {
+            new int[] { 0, 1, 2 },
+            new int[] { 3, 4, 5 },
+            new int[] { 6, 7, 8 },
+            new int[] { 0, 3, 6 },
+            new int[] { 1, 4, 7 },
+            new int[] { 2, 5, 8 },
+            new int[] { 0, 4, 8 },
+            new int[] { 2, 4, 6 }
+        };
+
+        foreach (var pattern in winPatterns)
+        {
+            if (!string.IsNullOrEmpty(grid[pattern[0]]) &&
+                grid[pattern[0]] == grid[pattern[1]] &&
+                grid[pattern[1]] == grid[pattern[2]])
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private bool IsBoardFull()
+    {
+        return grid.All(cell => !string.IsNullOrEmpty(cell));
+    }
+
+    private bool IsGameOver()
+    {
+        return gameStatus != "Game in progress";
+    }
+
+    private string GetCellClass(int index)
+    {
+        if (!string.IsNullOrEmpty(grid[index]))
+        {
+            return grid[index] == "X" ? "player-x" : "player-o";
+        }
+        return "";
+    }
+
+    private void ResetGame()
+    {
+        grid = new string[9];
+        currentPlayer = "X";
+        gameStatus = "Game in progress";
+    }
+}
+
+<style>
+    .game-container {
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .game-info {
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .grid-cell {
+        aspect-ratio: 1;
+        font-size: 2rem;
+        font-weight: bold;
+        border: 2px solid #333;
+        background-color: #fff;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .grid-cell:hover:not(:disabled) {
+        background-color: #f0f0f0;
+        transform: scale(1.05);
+    }
+
+    .grid-cell:disabled {
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+
+    .grid-cell.player-x {
+        color: #e74c3c;
+    }
+
+    .grid-cell.player-o {
+        color: #3498db;
+    }
+</style>

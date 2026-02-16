@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BlazorExperiments\BlazorExperiments\BlazorExperiments.csproj" />
+    <ProjectReference Include="..\BlazorGames\BlazorGames\BlazorGames.csproj" />
     <ProjectReference Include="..\EM.CMS.GrpcService\EM.CMS.GrpcService.csproj" />
   </ItemGroup>
 

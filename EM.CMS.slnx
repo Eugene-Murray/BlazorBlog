@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/Settings/">
+    <File Path="Directory.Packages.props" />
+  </Folder>
   <Folder Name="/Test/">
     <Project Path="UnitTestExamples/UnitTestExamples.csproj" Id="9c1a2981-4406-4d2e-898e-7d4a9636ba76" />
   </Folder>
@@ -11,6 +14,8 @@
     <Project Path="BlazorBlog/BlazorBlog/BlazorBlog.csproj" />
     <Project Path="BlazorGallery/BlazorGallery.Client/BlazorGallery.Client.csproj" />
     <Project Path="BlazorGallery/BlazorGallery/BlazorGallery.csproj" />
+    <Project Path="BlazorGames/BlazorGames.Client/BlazorGames.Client.csproj" />
+    <Project Path="BlazorGames/BlazorGames/BlazorGames.csproj" />
     <Project Path="ConsoleExperimentsApp/ConsoleExperimentsApp.csproj" Id="f5ef4d5c-65ff-42bc-9c09-b4e49670607f" />
     <Project Path="EM.CMS.API/EM.CMS.API.csproj" Id="2cb14fa5-792e-4069-8b2a-6b8328997045" />
     <Project Path="EM.CMS.GrpcService/EM.CMS.GrpcService.csproj" />
