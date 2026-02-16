@@ -1,0 +1,321 @@
+﻿@page "/carracegame"
+@rendermode InteractiveAuto
+@using System.Timers
+
+<div class="car-racing-game" tabindex="0" @onkeydown="HandleKeyDown" @ref="gameContainer">
+    <div class="game-header">
+        <h3>Car Racing Game</h3>
+        <div class="game-stats">
+            <span>Score: @score</span>
+            <span>Speed: @speed</span>
+        </div>
+    </div>
+
+    @if (!gameStarted)
+    {
+        <div class="game-start">
+            <h2>Press SPACE to Start</h2>
+            <p>Use LEFT and RIGHT arrow keys to move</p>
+        </div>
+    }
+
+    @if (gameOver)
+    {
+        <div class="game-over">
+            <h2>Game Over!</h2>
+            <p>Final Score: @score</p>
+            <button @onclick="RestartGame">Play Again</button>
+        </div>
+    }
+
+    <div class="game-road">
+        <!-- Road markings -->
+        @for (int i = 0; i < roadMarkings.Count; i++)
+        {
+            <div class="road-marking" style="top: @(roadMarkings[i])px"></div>
+        }
+
+        <!-- Player car -->
+        <div class="car player-car" style="left: @(playerX)px; top: @(playerY)px">
+            🏎️
+        </div>
+
+        <!-- Obstacle cars -->
+        @foreach (var obstacle in obstacles)
+        {
+            <div class="car obstacle-car" style="left: @(obstacle.X)px; top: @(obstacle.Y)px">
+                🚗
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .car-racing-game {
+        width: 100%;
+        max-width: 500px;
+        margin: 0 auto;
+        outline: none;
+        user-select: none;
+    }
+
+    .game-header {
+        background: #333;
+        color: white;
+        padding: 15px;
+        border-radius: 10px 10px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .game-header h3 {
+        margin: 0;
+    }
+
+    .game-stats {
+        display: flex;
+        gap: 20px;
+        font-weight: bold;
+    }
+
+    .game-road {
+        position: relative;
+        width: 100%;
+        height: 600px;
+        background: linear-gradient(to bottom, #555 0%, #333 100%);
+        border: 5px solid #222;
+        border-top: none;
+        overflow: hidden;
+    }
+
+    .road-marking {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 8px;
+        height: 40px;
+        background: white;
+    }
+
+    .car {
+        position: absolute;
+        font-size: 40px;
+        transition: left 0.1s ease;
+        filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.5));
+    }
+
+    .player-car {
+        z-index: 10;
+    }
+
+    .obstacle-car {
+        z-index: 5;
+    }
+
+    .game-start, .game-over {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0, 0, 0, 0.9);
+        color: white;
+        padding: 30px;
+        border-radius: 10px;
+        text-align: center;
+        z-index: 100;
+    }
+
+    .game-start h2, .game-over h2 {
+        margin-top: 0;
+        color: #4CAF50;
+    }
+
+    .game-over button {
+        margin-top: 20px;
+        padding: 10px 30px;
+        font-size: 18px;
+        background: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .game-over button:hover {
+        background: #45a049;
+    }
+</style>
+
+@code {
+    private ElementReference gameContainer;
+    private System.Timers.Timer? gameTimer;
+
+    private bool gameStarted = false;
+    private bool gameOver = false;
+    private int score = 0;
+    private int speed = 1;
+
+    private const int RoadWidth = 500;
+    private const int CarWidth = 40;
+    private const int CarHeight = 60;
+
+    private int playerX = 230;
+    private int playerY = 500;
+    private int playerSpeed = 15;
+
+    private List<Obstacle> obstacles = new();
+    private List<int> roadMarkings = new();
+    private Random random = new();
+
+    private int gameLoopCounter = 0;
+    private int obstacleSpawnRate = 60;
+
+    protected override void OnInitialized()
+    {
+        InitializeRoadMarkings();
+    }
+
+    private void InitializeRoadMarkings()
+    {
+        roadMarkings.Clear();
+        for (int i = 0; i < 15; i++)
+        {
+            roadMarkings.Add(i * 50);
+        }
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Code == "Space" && !gameStarted && !gameOver)
+        {
+            StartGame();
+            return;
+        }
+
+        if (!gameStarted || gameOver) return;
+
+        switch (e.Code)
+        {
+            case "ArrowLeft":
+                playerX = Math.Max(10, playerX - playerSpeed);
+                break;
+            case "ArrowRight":
+                playerX = Math.Min(RoadWidth - CarWidth - 10, playerX + playerSpeed);
+                break;
+        }
+    }
+
+    private void StartGame()
+    {
+        gameStarted = true;
+        gameOver = false;
+        score = 0;
+        speed = 1;
+        obstacles.Clear();
+        playerX = 230;
+        gameLoopCounter = 0;
+
+        gameTimer = new System.Timers.Timer(30);
+        gameTimer.Elapsed += GameLoop;
+        gameTimer.Start();
+    }
+
+    private async void GameLoop(object? sender, ElapsedEventArgs e)
+    {
+        await InvokeAsync(() =>
+        {
+            if (gameOver) return;
+
+            gameLoopCounter++;
+
+            // Update road markings
+            for (int i = 0; i < roadMarkings.Count; i++)
+            {
+                roadMarkings[i] += 3 + speed;
+                if (roadMarkings[i] > 600)
+                {
+                    roadMarkings[i] = -50;
+                }
+            }
+
+            // Spawn obstacles
+            if (gameLoopCounter % obstacleSpawnRate == 0)
+            {
+                SpawnObstacle();
+            }
+
+            // Update obstacles
+            for (int i = obstacles.Count - 1; i >= 0; i--)
+            {
+                obstacles[i].Y += 3 + speed;
+
+                // Remove off-screen obstacles
+                if (obstacles[i].Y > 600)
+                {
+                    obstacles.RemoveAt(i);
+                    score += 10;
+
+                    // Increase difficulty
+                    if (score % 100 == 0 && speed < 5)
+                    {
+                        speed++;
+                        obstacleSpawnRate = Math.Max(30, obstacleSpawnRate - 5);
+                    }
+                }
+                // Check collision
+                else if (CheckCollision(obstacles[i]))
+                {
+                    EndGame();
+                    return;
+                }
+            }
+
+            StateHasChanged();
+        });
+    }
+
+    private void SpawnObstacle()
+    {
+        int[] lanes = { 60, 150, 240, 330, 410 };
+        int lane = lanes[random.Next(lanes.Length)];
+
+        obstacles.Add(new Obstacle
+        {
+            X = lane,
+            Y = -60
+        });
+    }
+
+    private bool CheckCollision(Obstacle obstacle)
+    {
+        return playerX < obstacle.X + CarWidth &&
+               playerX + CarWidth > obstacle.X &&
+               playerY < obstacle.Y + CarHeight &&
+               playerY + CarHeight > obstacle.Y;
+    }
+
+    private void EndGame()
+    {
+        gameOver = true;
+        gameTimer?.Stop();
+        StateHasChanged();
+    }
+
+    private void RestartGame()
+    {
+        StartGame();
+    }
+
+    public void Dispose()
+    {
+        gameTimer?.Stop();
+        gameTimer?.Dispose();
+    }
+
+    private class Obstacle
+    {
+        public int X { get; set; }
+        public int Y { get; set; }
+    }
+}
