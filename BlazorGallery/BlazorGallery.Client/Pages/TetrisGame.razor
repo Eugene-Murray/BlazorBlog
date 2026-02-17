@@ -1,0 +1,647 @@
+﻿@page "/tetris-game"
+@rendermode InteractiveAuto
+@implements IDisposable
+
+<PageTitle>Tetris Game</PageTitle>
+
+<div class="tetris-container" @onkeydown="HandleKeyDown" tabindex="0" @ref="gameContainer">
+    <div class="game-area">
+        <div class="game-board">
+            @for (int row = 0; row < Rows; row++)
+            {
+                var r = row;
+                <div class="board-row">
+                    @for (int col = 0; col < Columns; col++)
+                    {
+                        var c = col;
+                        var cellClass = GetCellClass(r, c);
+                        <div class="cell @cellClass"></div>
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="side-panel">
+            <div class="info-box">
+                <h4>Score</h4>
+                <p class="score">@score</p>
+            </div>
+            <div class="info-box">
+                <h4>Level</h4>
+                <p class="level">@level</p>
+            </div>
+            <div class="info-box">
+                <h4>Lines</h4>
+                <p class="lines">@linesCleared</p>
+            </div>
+            <div class="info-box">
+                <h4>Next</h4>
+                <div class="next-piece">
+                    @if (nextPiece != null)
+                    {
+                        @for (int row = 0; row < 4; row++)
+                        {
+                            var r = row;
+                            <div class="preview-row">
+                                @for (int col = 0; col < 4; col++)
+                                {
+                                    var c = col;
+                                    var previewClass = GetPreviewClass(r, c);
+                                    <div class="preview-cell @previewClass"></div>
+                                }
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+            <div class="controls">
+                @if (!isGameRunning)
+                {
+                    <button class="btn btn-success" @onclick="StartGame">@(isGameOver ? "New Game" : "Start")</button>
+                }
+                else
+                {
+                    <button class="btn btn-warning" @onclick="TogglePause">@(isPaused ? "Resume" : "Pause")</button>
+                }
+            </div>
+        </div>
+    </div>
+
+    @if (isGameOver)
+    {
+        <div class="game-over-overlay">
+            <div class="game-over-content">
+                <h2>Game Over!</h2>
+                <p>Final Score: @score</p>
+                <button class="btn btn-primary" @onclick="StartGame">Play Again</button>
+            </div>
+        </div>
+    }
+
+    <div class="instructions">
+        <h5>Controls</h5>
+        <ul>
+            <li><kbd>←</kbd> <kbd>→</kbd> Move</li>
+            <li><kbd>↑</kbd> Rotate</li>
+            <li><kbd>↓</kbd> Soft Drop</li>
+            <li><kbd>Space</kbd> Hard Drop</li>
+            <li><kbd>P</kbd> Pause</li>
+        </ul>
+    </div>
+</div>
+
+<style>
+    .tetris-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        outline: none;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .game-area {
+        display: flex;
+        gap: 20px;
+    }
+
+    .game-board {
+        border: 3px solid #333;
+        background: #111;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .board-row {
+        display: flex;
+    }
+
+    .cell {
+        width: 28px;
+        height: 28px;
+        border: 1px solid #222;
+        box-sizing: border-box;
+    }
+
+    .side-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        min-width: 140px;
+    }
+
+    .info-box {
+        background: #222;
+        padding: 10px 15px;
+        border-radius: 8px;
+        text-align: center;
+    }
+
+    .info-box h4 {
+        margin: 0 0 5px 0;
+        color: #888;
+        font-size: 14px;
+        text-transform: uppercase;
+    }
+
+    .info-box p {
+        margin: 0;
+        font-size: 24px;
+        font-weight: bold;
+        color: #fff;
+    }
+
+    .next-piece {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 5px;
+    }
+
+    .preview-row {
+        display: flex;
+    }
+
+    .preview-cell {
+        width: 20px;
+        height: 20px;
+        border: 1px solid #333;
+    }
+
+    .controls button {
+        width: 100%;
+        padding: 10px;
+        font-size: 16px;
+    }
+
+    .instructions {
+        margin-top: 20px;
+        background: #222;
+        padding: 15px 25px;
+        border-radius: 8px;
+    }
+
+    .instructions h5 {
+        margin: 0 0 10px 0;
+        color: #fff;
+    }
+
+    .instructions ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .instructions li {
+        color: #aaa;
+        font-size: 14px;
+    }
+
+    .instructions kbd {
+        background: #444;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-family: monospace;
+    }
+
+    .game-over-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .game-over-content {
+        background: #222;
+        padding: 40px;
+        border-radius: 12px;
+        text-align: center;
+    }
+
+    .game-over-content h2 {
+        color: #ff4444;
+        margin: 0 0 15px 0;
+    }
+
+    .game-over-content p {
+        color: #fff;
+        font-size: 20px;
+        margin-bottom: 20px;
+    }
+
+    /* Tetromino colors */
+    .cell-I { background: linear-gradient(135deg, #00f5ff, #00b8cc); }
+    .cell-O { background: linear-gradient(135deg, #ffff00, #cccc00); }
+    .cell-T { background: linear-gradient(135deg, #aa00ff, #7700b3); }
+    .cell-S { background: linear-gradient(135deg, #00ff00, #00cc00); }
+    .cell-Z { background: linear-gradient(135deg, #ff0000, #cc0000); }
+    .cell-J { background: linear-gradient(135deg, #0000ff, #0000cc); }
+    .cell-L { background: linear-gradient(135deg, #ff8800, #cc6600); }
+    .cell-ghost { background: rgba(255, 255, 255, 0.15); border: 1px dashed #555; }
+</style>
+
+@code {
+    private const int Rows = 20;
+    private const int Columns = 10;
+
+    private ElementReference gameContainer;
+    private System.Timers.Timer? gameTimer;
+    private int[,] board = new int[Rows, Columns];
+    private Tetromino? currentPiece;
+    private Tetromino? nextPiece;
+    private int score;
+    private int level = 1;
+    private int linesCleared;
+    private bool isGameRunning;
+    private bool isGameOver;
+    private bool isPaused;
+    private Random random = new();
+
+    private static readonly int[][,] Shapes =
+    [
+        new int[,] { { 1, 1, 1, 1 } }, // I
+        new int[,] { { 1, 1 }, { 1, 1 } }, // O
+        new int[,] { { 0, 1, 0 }, { 1, 1, 1 } }, // T
+        new int[,] { { 0, 1, 1 }, { 1, 1, 0 } }, // S
+        new int[,] { { 1, 1, 0 }, { 0, 1, 1 } }, // Z
+        new int[,] { { 1, 0, 0 }, { 1, 1, 1 } }, // J
+        new int[,] { { 0, 0, 1 }, { 1, 1, 1 } }  // L
+    ];
+
+    private static readonly string[] ShapeNames = ["I", "O", "T", "S", "Z", "J", "L"];
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await gameContainer.FocusAsync();
+        }
+    }
+
+    private void StartGame()
+    {
+        board = new int[Rows, Columns];
+        score = 0;
+        level = 1;
+        linesCleared = 0;
+        isGameOver = false;
+        isPaused = false;
+        isGameRunning = true;
+
+        SpawnNextPiece();
+        SpawnNewPiece();
+        StartTimer();
+    }
+
+    private void StartTimer()
+    {
+        gameTimer?.Dispose();
+        gameTimer = new System.Timers.Timer(GetDropInterval());
+        gameTimer.Elapsed += async (s, e) => await GameTick();
+        gameTimer.Start();
+    }
+
+    private int GetDropInterval() => Math.Max(100, 1000 - (level - 1) * 100);
+
+    private async Task GameTick()
+    {
+        if (isPaused || isGameOver) return;
+
+        await InvokeAsync(() =>
+        {
+            if (!MovePiece(0, 1))
+            {
+                LockPiece();
+                ClearLines();
+                SpawnNewPiece();
+
+                if (!IsValidPosition(currentPiece!))
+                {
+                    isGameOver = true;
+                    isGameRunning = false;
+                    gameTimer?.Stop();
+                }
+            }
+            StateHasChanged();
+        });
+    }
+
+    private void SpawnNextPiece()
+    {
+        int shapeIndex = random.Next(Shapes.Length);
+        nextPiece = new Tetromino
+        {
+            Shape = (int[,])Shapes[shapeIndex].Clone(),
+            ShapeIndex = shapeIndex,
+            Row = 0,
+            Col = Columns / 2 - Shapes[shapeIndex].GetLength(1) / 2
+        };
+    }
+
+    private void SpawnNewPiece()
+    {
+        currentPiece = nextPiece;
+        currentPiece!.Row = 0;
+        currentPiece.Col = Columns / 2 - currentPiece.Shape.GetLength(1) / 2;
+        SpawnNextPiece();
+    }
+
+    private bool MovePiece(int deltaCol, int deltaRow)
+    {
+        if (currentPiece == null) return false;
+
+        currentPiece.Col += deltaCol;
+        currentPiece.Row += deltaRow;
+
+        if (!IsValidPosition(currentPiece))
+        {
+            currentPiece.Col -= deltaCol;
+            currentPiece.Row -= deltaRow;
+            return false;
+        }
+        return true;
+    }
+
+    private void RotatePiece()
+    {
+        if (currentPiece == null || currentPiece.ShapeIndex == 1) return; // O doesn't rotate
+
+        var original = currentPiece.Shape;
+        int rows = original.GetLength(0);
+        int cols = original.GetLength(1);
+        var rotated = new int[cols, rows];
+
+        for (int r = 0; r < rows; r++)
+            for (int c = 0; c < cols; c++)
+                rotated[c, rows - 1 - r] = original[r, c];
+
+        currentPiece.Shape = rotated;
+
+        if (!IsValidPosition(currentPiece))
+        {
+            // Wall kick attempts
+            int[] kicks = [-1, 1, -2, 2];
+            bool kicked = false;
+            foreach (var kick in kicks)
+            {
+                currentPiece.Col += kick;
+                if (IsValidPosition(currentPiece))
+                {
+                    kicked = true;
+                    break;
+                }
+                currentPiece.Col -= kick;
+            }
+            if (!kicked) currentPiece.Shape = original;
+        }
+    }
+
+    private void HardDrop()
+    {
+        if (currentPiece == null) return;
+
+        int dropDistance = 0;
+        while (MovePiece(0, 1)) dropDistance++;
+
+        score += dropDistance * 2;
+        LockPiece();
+        ClearLines();
+        SpawnNewPiece();
+
+        if (!IsValidPosition(currentPiece!))
+        {
+            isGameOver = true;
+            isGameRunning = false;
+            gameTimer?.Stop();
+        }
+    }
+
+    private int GetGhostRow()
+    {
+        if (currentPiece == null) return 0;
+
+        int originalRow = currentPiece.Row;
+        while (IsValidPosition(currentPiece))
+            currentPiece.Row++;
+        currentPiece.Row--;
+        int ghostRow = currentPiece.Row;
+        currentPiece.Row = originalRow;
+        return ghostRow;
+    }
+
+    private bool IsValidPosition(Tetromino piece)
+    {
+        int rows = piece.Shape.GetLength(0);
+        int cols = piece.Shape.GetLength(1);
+
+        for (int r = 0; r < rows; r++)
+        {
+            for (int c = 0; c < cols; c++)
+            {
+                if (piece.Shape[r, c] == 0) continue;
+
+                int boardRow = piece.Row + r;
+                int boardCol = piece.Col + c;
+
+                if (boardCol < 0 || boardCol >= Columns || boardRow >= Rows)
+                    return false;
+
+                if (boardRow >= 0 && board[boardRow, boardCol] != 0)
+                    return false;
+            }
+        }
+        return true;
+    }
+
+    private void LockPiece()
+    {
+        if (currentPiece == null) return;
+
+        int rows = currentPiece.Shape.GetLength(0);
+        int cols = currentPiece.Shape.GetLength(1);
+
+        for (int r = 0; r < rows; r++)
+        {
+            for (int c = 0; c < cols; c++)
+            {
+                if (currentPiece.Shape[r, c] == 0) continue;
+
+                int boardRow = currentPiece.Row + r;
+                int boardCol = currentPiece.Col + c;
+
+                if (boardRow >= 0 && boardRow < Rows && boardCol >= 0 && boardCol < Columns)
+                    board[boardRow, boardCol] = currentPiece.ShapeIndex + 1;
+            }
+        }
+    }
+
+    private void ClearLines()
+    {
+        int cleared = 0;
+
+        for (int row = Rows - 1; row >= 0; row--)
+        {
+            bool full = true;
+            for (int col = 0; col < Columns; col++)
+            {
+                if (board[row, col] == 0)
+                {
+                    full = false;
+                    break;
+                }
+            }
+
+            if (full)
+            {
+                cleared++;
+                for (int r = row; r > 0; r--)
+                    for (int c = 0; c < Columns; c++)
+                        board[r, c] = board[r - 1, c];
+
+                for (int c = 0; c < Columns; c++)
+                    board[0, c] = 0;
+
+                row++; // Check same row again
+            }
+        }
+
+        if (cleared > 0)
+        {
+            linesCleared += cleared;
+            score += cleared switch
+            {
+                1 => 100 * level,
+                2 => 300 * level,
+                3 => 500 * level,
+                4 => 800 * level,
+                _ => 0
+            };
+
+            int newLevel = linesCleared / 10 + 1;
+            if (newLevel > level)
+            {
+                level = newLevel;
+                gameTimer?.Stop();
+                StartTimer();
+            }
+        }
+    }
+
+    private string GetCellClass(int row, int col)
+    {
+        // Check locked pieces
+        if (board[row, col] != 0)
+            return $"cell-{ShapeNames[board[row, col] - 1]}";
+
+        if (currentPiece == null) return "";
+
+        // Check ghost piece
+        int ghostRow = GetGhostRow();
+        int shapeRows = currentPiece.Shape.GetLength(0);
+        int shapeCols = currentPiece.Shape.GetLength(1);
+
+        int pieceR = row - ghostRow;
+        int pieceC = col - currentPiece.Col;
+
+        if (pieceR >= 0 && pieceR < shapeRows && pieceC >= 0 && pieceC < shapeCols)
+        {
+            if (currentPiece.Shape[pieceR, pieceC] != 0 && ghostRow != currentPiece.Row)
+                return "cell-ghost";
+        }
+
+        // Check current piece
+        pieceR = row - currentPiece.Row;
+        pieceC = col - currentPiece.Col;
+
+        if (pieceR >= 0 && pieceR < shapeRows && pieceC >= 0 && pieceC < shapeCols)
+        {
+            if (currentPiece.Shape[pieceR, pieceC] != 0)
+                return $"cell-{ShapeNames[currentPiece.ShapeIndex]}";
+        }
+
+        return "";
+    }
+
+    private string GetPreviewClass(int row, int col)
+    {
+        if (nextPiece == null) return "";
+
+        int shapeRows = nextPiece.Shape.GetLength(0);
+        int shapeCols = nextPiece.Shape.GetLength(1);
+        int offsetR = (4 - shapeRows) / 2;
+        int offsetC = (4 - shapeCols) / 2;
+
+        int pieceR = row - offsetR;
+        int pieceC = col - offsetC;
+
+        if (pieceR >= 0 && pieceR < shapeRows && pieceC >= 0 && pieceC < shapeCols)
+        {
+            if (nextPiece.Shape[pieceR, pieceC] != 0)
+                return $"cell-{ShapeNames[nextPiece.ShapeIndex]}";
+        }
+
+        return "";
+    }
+
+    private void HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (!isGameRunning || isGameOver) return;
+
+        if (e.Key == "p" || e.Key == "P")
+        {
+            TogglePause();
+            return;
+        }
+
+        if (isPaused) return;
+
+        switch (e.Key)
+        {
+            case "ArrowLeft":
+                MovePiece(-1, 0);
+                break;
+            case "ArrowRight":
+                MovePiece(1, 0);
+                break;
+            case "ArrowDown":
+                if (MovePiece(0, 1)) score++;
+                break;
+            case "ArrowUp":
+                RotatePiece();
+                break;
+            case " ":
+                HardDrop();
+                break;
+        }
+    }
+
+    private void TogglePause()
+    {
+        isPaused = !isPaused;
+        if (isPaused)
+            gameTimer?.Stop();
+        else
+            gameTimer?.Start();
+    }
+
+    public void Dispose()
+    {
+        gameTimer?.Dispose();
+    }
+
+    private class Tetromino
+    {
+        public int[,] Shape { get; set; } = new int[0, 0];
+        public int ShapeIndex { get; set; }
+        public int Row { get; set; }
+        public int Col { get; set; }
+    }
+}
