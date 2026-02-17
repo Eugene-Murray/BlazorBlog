@@ -1,0 +1,546 @@
+﻿@page "/solitairegame"
+@rendermode InteractiveAuto
+
+<div class="solitaire-container">
+    <h3>Solitaire</h3>
+    <div class="game-controls">
+        <button class="btn btn-primary" @onclick="NewGame">New Game</button>
+        <span class="moves-counter">Moves: @_moves</span>
+        @if (_gameWon)
+        {
+            <span class="win-message">🎉 You Won!</span>
+        }
+    </div>
+
+    <div class="game-board">
+        <!-- Stock and Waste piles -->
+        <div class="top-row">
+            <div class="stock-waste">
+                <div class="card-pile stock" @onclick="DrawFromStock">
+                    @if (_stock.Count > 0)
+                    {
+                        <div class="card back"></div>
+                    }
+                    else
+                    {
+                        <div class="card empty refresh">↻</div>
+                    }
+                </div>
+                <div class="card-pile waste">
+                    @if (_waste.Count > 0)
+                    {
+                        var card = _waste.Peek();
+                        <div class="card @GetCardColorClass(card)" @onclick="() => SelectCard(card, CardLocation.Waste)">
+                            <span class="card-value">@GetCardDisplay(card)</span>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="card empty"></div>
+                    }
+                </div>
+            </div>
+
+            <!-- Foundation piles -->
+            <div class="foundations">
+                @for (int i = 0; i < 4; i++)
+                {
+                    var index = i;
+                    <div class="card-pile foundation" @onclick="() => MoveToFoundation(index)">
+                        @if (_foundations[index].Count > 0)
+                        {
+                            var card = _foundations[index].Peek();
+                            <div class="card @GetCardColorClass(card)">
+                                <span class="card-value">@GetCardDisplay(card)</span>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="card empty">@GetSuitSymbol((Suit)index)</div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Tableau piles -->
+        <div class="tableau">
+            @for (int i = 0; i < 7; i++)
+            {
+                var pileIndex = i;
+                <div class="card-pile tableau-pile" @onclick="() => MoveToTableau(pileIndex)">
+                    @if (_tableau[pileIndex].Count == 0)
+                    {
+                        <div class="card empty king-placeholder">K</div>
+                    }
+                    else
+                    {
+                        @for (int j = 0; j < _tableau[pileIndex].Count; j++)
+                        {
+                            var card = _tableau[pileIndex][j];
+                            var cardIndex = j;
+                            var topOffset = j * 25;
+                            <div class="card @(card.IsFaceUp ? GetCardColorClass(card) : "back")"
+                                 style="top: @(topOffset)px;"
+                                 @onclick="() => SelectCardFromTableau(card, pileIndex, cardIndex)"
+                                 @onclick:stopPropagation="true">
+                                @if (card.IsFaceUp)
+                                {
+                                    <span class="card-value">@GetCardDisplay(card)</span>
+                                }
+                            </div>
+                        }
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .solitaire-container {
+        padding: 20px;
+        background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%);
+        min-height: 100vh;
+        color: white;
+    }
+
+    .game-controls {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .moves-counter {
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+
+    .win-message {
+        font-size: 1.5rem;
+        color: #ffd700;
+        animation: pulse 1s infinite;
+    }
+
+    @@keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+
+    .game-board {
+        display: flex;
+        flex-direction: column;
+        gap: 30px;
+    }
+
+    .top-row {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .stock-waste {
+        display: flex;
+        gap: 15px;
+    }
+
+    .foundations {
+        display: flex;
+        gap: 15px;
+    }
+
+    .tableau {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+    }
+
+    .card-pile {
+        width: 80px;
+        height: 110px;
+        position: relative;
+    }
+
+    .tableau-pile {
+        height: 400px;
+    }
+
+    .card {
+        width: 80px;
+        height: 110px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        font-weight: bold;
+        cursor: pointer;
+        position: absolute;
+        transition: transform 0.1s, box-shadow 0.1s;
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+    }
+
+    .card:hover {
+        transform: translateY(-3px);
+        box-shadow: 4px 4px 10px rgba(0,0,0,0.4);
+    }
+
+    .card.red {
+        background: white;
+        color: #cc0000;
+        border: 1px solid #ccc;
+    }
+
+    .card.black {
+        background: white;
+        color: #000;
+        border: 1px solid #ccc;
+    }
+
+    .card.back {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        border: 3px solid white;
+    }
+
+    .card.back::after {
+        content: "♠♣♥♦";
+        color: rgba(255,255,255,0.3);
+        font-size: 0.8rem;
+    }
+
+    .card.empty {
+        background: rgba(255,255,255,0.1);
+        border: 2px dashed rgba(255,255,255,0.3);
+        color: rgba(255,255,255,0.3);
+        font-size: 2rem;
+    }
+
+    .card.empty.refresh {
+        font-size: 2.5rem;
+        cursor: pointer;
+    }
+
+    .card.selected {
+        box-shadow: 0 0 15px 5px #ffd700;
+        transform: translateY(-5px);
+    }
+
+    .card-value {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        line-height: 1;
+    }
+
+    .stock {
+        cursor: pointer;
+    }
+</style>
+
+@code {
+    private List<Card> _deck = [];
+    private Stack<Card> _stock = new();
+    private Stack<Card> _waste = new();
+    private Stack<Card>[] _foundations = new Stack<Card>[4];
+    private List<Card>[] _tableau = new List<Card>[7];
+    private Card? _selectedCard;
+    private CardLocation _selectedLocation;
+    private int _selectedTableauPile = -1;
+    private int _selectedTableauIndex = -1;
+    private int _moves;
+    private bool _gameWon;
+
+    protected override void OnInitialized()
+    {
+        InitializeGame();
+    }
+
+    private void InitializeGame()
+    {
+        for (int i = 0; i < 4; i++)
+            _foundations[i] = new Stack<Card>();
+
+        for (int i = 0; i < 7; i++)
+            _tableau[i] = [];
+
+        CreateDeck();
+        ShuffleDeck();
+        DealCards();
+    }
+
+    private void NewGame()
+    {
+        _moves = 0;
+        _gameWon = false;
+        _selectedCard = null;
+        _stock.Clear();
+        _waste.Clear();
+        InitializeGame();
+    }
+
+    private void CreateDeck()
+    {
+        _deck.Clear();
+        foreach (Suit suit in Enum.GetValues<Suit>())
+        {
+            foreach (Rank rank in Enum.GetValues<Rank>())
+            {
+                _deck.Add(new Card(suit, rank));
+            }
+        }
+    }
+
+    private void ShuffleDeck()
+    {
+        var random = new Random();
+        for (int i = _deck.Count - 1; i > 0; i--)
+        {
+            int j = random.Next(i + 1);
+            (_deck[i], _deck[j]) = (_deck[j], _deck[i]);
+        }
+    }
+
+    private void DealCards()
+    {
+        int cardIndex = 0;
+
+        for (int i = 0; i < 7; i++)
+        {
+            for (int j = i; j < 7; j++)
+            {
+                var card = _deck[cardIndex++];
+                card.IsFaceUp = (i == j);
+                _tableau[j].Add(card);
+            }
+        }
+
+        while (cardIndex < _deck.Count)
+        {
+            _stock.Push(_deck[cardIndex++]);
+        }
+    }
+
+    private void DrawFromStock()
+    {
+        ClearSelection();
+
+        if (_stock.Count > 0)
+        {
+            var card = _stock.Pop();
+            card.IsFaceUp = true;
+            _waste.Push(card);
+            _moves++;
+        }
+        else if (_waste.Count > 0)
+        {
+            while (_waste.Count > 0)
+            {
+                var card = _waste.Pop();
+                card.IsFaceUp = false;
+                _stock.Push(card);
+            }
+        }
+    }
+
+    private void SelectCard(Card card, CardLocation location)
+    {
+        if (_selectedCard == card)
+        {
+            ClearSelection();
+            return;
+        }
+
+        _selectedCard = card;
+        _selectedLocation = location;
+        _selectedTableauPile = -1;
+        _selectedTableauIndex = -1;
+    }
+
+    private void SelectCardFromTableau(Card card, int pileIndex, int cardIndex)
+    {
+        if (!card.IsFaceUp)
+        {
+            if (cardIndex == _tableau[pileIndex].Count - 1)
+            {
+                card.IsFaceUp = true;
+                _moves++;
+            }
+            return;
+        }
+
+        if (_selectedCard != null && _selectedLocation == CardLocation.Tableau && _selectedTableauPile == pileIndex)
+        {
+            ClearSelection();
+            return;
+        }
+
+        if (_selectedCard != null)
+        {
+            TryMoveToTableau(pileIndex);
+            return;
+        }
+
+        _selectedCard = card;
+        _selectedLocation = CardLocation.Tableau;
+        _selectedTableauPile = pileIndex;
+        _selectedTableauIndex = cardIndex;
+    }
+
+    private void MoveToFoundation(int foundationIndex)
+    {
+        if (_selectedCard == null) return;
+
+        var foundation = _foundations[foundationIndex];
+
+        if (CanMoveToFoundation(_selectedCard, foundation, foundationIndex))
+        {
+            RemoveSelectedCard();
+            foundation.Push(_selectedCard);
+            _moves++;
+            ClearSelection();
+            CheckWinCondition();
+        }
+    }
+
+    private void MoveToTableau(int pileIndex)
+    {
+        if (_selectedCard == null) return;
+        TryMoveToTableau(pileIndex);
+    }
+
+    private void TryMoveToTableau(int pileIndex)
+    {
+        if (_selectedCard == null) return;
+
+        var pile = _tableau[pileIndex];
+
+        if (CanMoveToTableau(_selectedCard, pile))
+        {
+            var cardsToMove = GetCardsToMove();
+            RemoveSelectedCard();
+
+            foreach (var card in cardsToMove)
+            {
+                pile.Add(card);
+            }
+
+            _moves++;
+            ClearSelection();
+            FlipTopCards();
+        }
+    }
+
+    private List<Card> GetCardsToMove()
+    {
+        if (_selectedLocation == CardLocation.Tableau && _selectedTableauIndex >= 0)
+        {
+            var pile = _tableau[_selectedTableauPile];
+            return pile.Skip(_selectedTableauIndex).ToList();
+        }
+        return [_selectedCard!];
+    }
+
+    private bool CanMoveToFoundation(Card card, Stack<Card> foundation, int foundationIndex)
+    {
+        if ((int)card.Suit != foundationIndex) return false;
+
+        if (foundation.Count == 0)
+            return card.Rank == Rank.Ace;
+
+        return card.Rank == foundation.Peek().Rank + 1;
+    }
+
+    private bool CanMoveToTableau(Card card, List<Card> pile)
+    {
+        if (pile.Count == 0)
+            return card.Rank == Rank.King;
+
+        var topCard = pile[^1];
+        return IsOppositeColor(card, topCard) && card.Rank == topCard.Rank - 1;
+    }
+
+    private bool IsOppositeColor(Card card1, Card card2)
+    {
+        bool card1Red = card1.Suit is Suit.Hearts or Suit.Diamonds;
+        bool card2Red = card2.Suit is Suit.Hearts or Suit.Diamonds;
+        return card1Red != card2Red;
+    }
+
+    private void RemoveSelectedCard()
+    {
+        switch (_selectedLocation)
+        {
+            case CardLocation.Waste:
+                _waste.Pop();
+                break;
+            case CardLocation.Tableau:
+                var pile = _tableau[_selectedTableauPile];
+                pile.RemoveRange(_selectedTableauIndex, pile.Count - _selectedTableauIndex);
+                break;
+        }
+    }
+
+    private void FlipTopCards()
+    {
+        foreach (var pile in _tableau)
+        {
+            if (pile.Count > 0 && !pile[^1].IsFaceUp)
+            {
+                pile[^1].IsFaceUp = true;
+            }
+        }
+    }
+
+    private void ClearSelection()
+    {
+        _selectedCard = null;
+        _selectedTableauPile = -1;
+        _selectedTableauIndex = -1;
+    }
+
+    private void CheckWinCondition()
+    {
+        _gameWon = _foundations.All(f => f.Count == 13);
+    }
+
+    private string GetCardColorClass(Card card)
+    {
+        var color = card.Suit is Suit.Hearts or Suit.Diamonds ? "red" : "black";
+        var selected = card == _selectedCard ? " selected" : "";
+        return color + selected;
+    }
+
+    private string GetCardDisplay(Card card)
+    {
+        return $"{GetRankSymbol(card.Rank)}{GetSuitSymbol(card.Suit)}";
+    }
+
+    private string GetSuitSymbol(Suit suit) => suit switch
+    {
+        Suit.Hearts => "♥",
+        Suit.Diamonds => "♦",
+        Suit.Clubs => "♣",
+        Suit.Spades => "♠",
+        _ => ""
+    };
+
+    private string GetRankSymbol(Rank rank) => rank switch
+    {
+        Rank.Ace => "A",
+        Rank.Jack => "J",
+        Rank.Queen => "Q",
+        Rank.King => "K",
+        _ => ((int)rank).ToString()
+    };
+
+    private enum Suit { Hearts, Diamonds, Clubs, Spades }
+    private enum Rank { Ace = 1, Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King }
+    private enum CardLocation { Stock, Waste, Foundation, Tableau }
+
+    private class Card(Suit suit, Rank rank)
+    {
+        public Suit Suit { get; } = suit;
+        public Rank Rank { get; } = rank;
+        public bool IsFaceUp { get; set; }
+    }
+}
