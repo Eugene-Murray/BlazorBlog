@@ -1,0 +1,841 @@
+﻿@page "/turbooutruncargame"
+@rendermode InteractiveAuto
+@using System.Timers
+@implements IDisposable
+
+<div class="turbo-outrun-game" tabindex="0" @onkeydown="HandleKeyDown" @onkeyup="HandleKeyUp" @ref="gameContainer">
+    <div class="game-header">
+        <h3>🏎️ Turbo OutRun</h3>
+        <div class="game-stats">
+            <span>Speed: @((int)speed) mph</span>
+            <span>Score: @score</span>
+            <span>Distance: @((int)distance)m</span>
+            <span>Time: @timeRemaining.ToString(@"m\:ss")</span>
+        </div>
+    </div>
+
+    @if (!gameStarted)
+    {
+        <div class="game-overlay">
+            <h2>🏁 Turbo OutRun</h2>
+            <p>Press SPACE to Start</p>
+            <p>Use ← → to steer</p>
+            <p>↑ Accelerate | ↓ Brake</p>
+        </div>
+    }
+
+    @if (gameOver)
+    {
+        <div class="game-overlay">
+            <h2>@(timeRemaining <= TimeSpan.Zero ? "⏱️ Time's Up!" : "💥 Crashed!")</h2>
+            <p>Final Score: @score</p>
+            <p>Distance: @((int)distance)m</p>
+            <button @onclick="RestartGame">Play Again</button>
+        </div>
+    }
+
+    <div class="game-area">
+        <!-- Sky gradient -->
+        <div class="sky">
+            <div class="sun"></div>
+            @foreach (var cloud in clouds)
+            {
+                <div class="cloud" style="left: @(cloud.X)px; top: @(cloud.Y)px; transform: scale(@cloud.Scale);">☁️</div>
+            }
+        </div>
+
+        <!-- Mountains/horizon -->
+        <div class="horizon">
+            @for (int i = 0; i < 8; i++)
+            {
+                <div class="mountain" style="left: @(i * 100 - horizonOffset % 100)px;"></div>
+            }
+        </div>
+
+        <!-- Road -->
+        <div class="road-container">
+            @for (int i = 0; i < RoadSegments; i++)
+            {
+                var segment = GetRoadSegment(i);
+                <div class="road-segment" style="
+                    bottom: @(i * SegmentHeight)px;
+                    height: @(SegmentHeight + 1)px;
+                    --road-width: @(segment.RoadWidth)px;
+                    --grass-color: @(segment.IsStripe ? "#228B22" : "#32CD32");
+                    --rumble-color: @(segment.IsStripe ? "#FF0000" : "#FFFFFF");
+                    --road-color: @(segment.IsStripe ? "#444444" : "#555555");
+                    --lane-color: @(segment.IsStripe ? "#FFFFFF" : "#555555");
+                    transform: translateX(@(segment.Curve)px);
+                ">
+                    <div class="grass left"></div>
+                    <div class="rumble left"></div>
+                    <div class="road-surface">
+                        <div class="lane-marker left"></div>
+                        <div class="lane-marker right"></div>
+                    </div>
+                    <div class="rumble right"></div>
+                    <div class="grass right"></div>
+                </div>
+            }
+
+            <!-- Other cars -->
+            @foreach (var car in otherCars)
+            {
+                var carVisual = GetCarVisual(car);
+                @if (carVisual.Visible)
+                {
+                    <div class="other-car" style="
+                        bottom: @(carVisual.ScreenY)px;
+                        left: calc(50% + @(carVisual.ScreenX)px);
+                        transform: translateX(-50%) scale(@carVisual.Scale);
+                        z-index: @(100 - (int)carVisual.ScreenY);
+                    ">
+                        @car.Emoji
+                    </div>
+                }
+            }
+
+            <!-- Roadside objects -->
+            @foreach (var obj in roadsideObjects)
+            {
+                var objVisual = GetObjectVisual(obj);
+                @if (objVisual.Visible)
+                {
+                    <div class="roadside-object" style="
+                        bottom: @(objVisual.ScreenY)px;
+                        left: calc(50% + @(objVisual.ScreenX)px);
+                        transform: translateX(-50%) scale(@objVisual.Scale);
+                        z-index: @(100 - (int)objVisual.ScreenY);
+                    ">
+                        @obj.Emoji
+                    </div>
+                }
+            }
+        </div>
+
+        <!-- Player car -->
+        <div class="player-car" style="left: calc(50% + @(playerX)px);">
+            <div class="car-body @(isTurningLeft ? "turn-left" : "") @(isTurningRight ? "turn-right" : "")">
+                🏎️
+            </div>
+            @if (speed > 100)
+            {
+                <div class="speed-lines"></div>
+            }
+        </div>
+
+        <!-- Speedometer -->
+        <div class="speedometer">
+            <div class="speed-bar" style="width: @(Math.Min(speed / MaxSpeed * 100, 100))%;"></div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .turbo-outrun-game {
+        width: 100%;
+        max-width: 700px;
+        margin: 0 auto;
+        outline: none;
+        user-select: none;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .game-header {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        color: #ff6600;
+        padding: 15px 20px;
+        border-radius: 10px 10px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: 2px solid #ff6600;
+        border-bottom: none;
+    }
+
+    .game-header h3 {
+        margin: 0;
+        font-size: 1.5rem;
+    }
+
+    .game-stats {
+        display: flex;
+        gap: 20px;
+        font-weight: bold;
+        font-size: 0.95rem;
+    }
+
+    .game-area {
+        position: relative;
+        width: 100%;
+        height: 450px;
+        background: linear-gradient(180deg, #87CEEB 0%, #E0F6FF 40%, #228B22 40%, #228B22 100%);
+        border: 2px solid #ff6600;
+        border-top: none;
+        border-radius: 0 0 10px 10px;
+        overflow: hidden;
+    }
+
+    .sky {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 40%;
+        background: linear-gradient(180deg, #1e90ff 0%, #87CEEB 60%, #FFB347 100%);
+        overflow: hidden;
+    }
+
+    .sun {
+        position: absolute;
+        top: 20px;
+        right: 80px;
+        width: 60px;
+        height: 60px;
+        background: radial-gradient(circle, #FFD700 0%, #FFA500 70%, transparent 100%);
+        border-radius: 50%;
+        box-shadow: 0 0 40px #FFD700;
+    }
+
+    .cloud {
+        position: absolute;
+        font-size: 40px;
+        opacity: 0.8;
+        filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.1));
+    }
+
+    .horizon {
+        position: absolute;
+        top: 35%;
+        left: 0;
+        right: 0;
+        height: 30px;
+        overflow: hidden;
+    }
+
+    .mountain {
+        position: absolute;
+        width: 0;
+        height: 0;
+        border-left: 50px solid transparent;
+        border-right: 50px solid transparent;
+        border-bottom: 30px solid #4a6741;
+    }
+
+    .road-container {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 60%;
+        overflow: hidden;
+    }
+
+    .road-segment {
+        position: absolute;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: center;
+        align-items: stretch;
+    }
+
+    .grass {
+        flex: 1;
+        background-color: var(--grass-color);
+    }
+
+    .rumble {
+        width: calc(var(--road-width) * 0.05);
+        background-color: var(--rumble-color);
+    }
+
+    .road-surface {
+        width: var(--road-width);
+        background-color: var(--road-color);
+        position: relative;
+        display: flex;
+        justify-content: space-around;
+    }
+
+    .lane-marker {
+        width: 4px;
+        height: 100%;
+        background-color: var(--lane-color);
+    }
+
+    .player-car {
+        position: absolute;
+        bottom: 30px;
+        transform: translateX(-50%);
+        font-size: 50px;
+        z-index: 200;
+        filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));
+        transition: left 0.05s ease-out;
+    }
+
+    .car-body {
+        transition: transform 0.1s;
+    }
+
+    .car-body.turn-left {
+        transform: rotate(-8deg);
+    }
+
+    .car-body.turn-right {
+        transform: rotate(8deg);
+    }
+
+    .speed-lines {
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40px;
+        height: 20px;
+        background: linear-gradient(180deg, 
+            transparent 0%, 
+            rgba(255,255,255,0.5) 20%, 
+            transparent 40%,
+            rgba(255,255,255,0.3) 60%,
+            transparent 80%);
+    }
+
+    .other-car {
+        position: absolute;
+        font-size: 40px;
+        filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4));
+        transform-origin: bottom center;
+    }
+
+    .roadside-object {
+        position: absolute;
+        font-size: 30px;
+        transform-origin: bottom center;
+    }
+
+    .speedometer {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        width: 150px;
+        height: 15px;
+        background: rgba(0,0,0,0.5);
+        border-radius: 8px;
+        border: 2px solid #ff6600;
+        overflow: hidden;
+    }
+
+    .speed-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #00ff00, #ffff00, #ff6600, #ff0000);
+        transition: width 0.1s;
+    }
+
+    .game-overlay {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0, 0, 0, 0.9);
+        color: #ff6600;
+        padding: 40px 50px;
+        border-radius: 15px;
+        text-align: center;
+        z-index: 300;
+        border: 2px solid #ff6600;
+        box-shadow: 0 0 30px rgba(255, 102, 0, 0.3);
+    }
+
+    .game-overlay h2 {
+        margin-top: 0;
+        font-size: 2rem;
+    }
+
+    .game-overlay p {
+        font-size: 1.1rem;
+        margin: 10px 0;
+        color: #fff;
+    }
+
+    .game-overlay button {
+        margin-top: 20px;
+        padding: 12px 35px;
+        font-size: 18px;
+        background: transparent;
+        color: #ff6600;
+        border: 2px solid #ff6600;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .game-overlay button:hover {
+        background: #ff6600;
+        color: #000;
+    }
+</style>
+
+@code {
+    private ElementReference gameContainer;
+    private System.Timers.Timer? gameTimer;
+
+    private bool gameStarted = false;
+    private bool gameOver = false;
+    private int score = 0;
+    private double distance = 0;
+    private TimeSpan timeRemaining = TimeSpan.FromSeconds(60);
+    private DateTime lastTick = DateTime.Now;
+
+    private const int GameWidth = 700;
+    private const int GameHeight = 450;
+    private const int RoadSegments = 60;
+    private const int SegmentHeight = 5;
+    private const double MaxSpeed = 200;
+    private const double Acceleration = 0.5;
+    private const double Deceleration = 0.3;
+    private const double Friction = 0.1;
+    private const double SteerSpeed = 5;
+    private const double MaxSteer = 150;
+
+    private double playerX = 0;
+    private double speed = 0;
+    private double roadPosition = 0;
+    private double horizonOffset = 0;
+    private double currentCurve = 0;
+    private double targetCurve = 0;
+    private double curveAccumulator = 0;
+
+    private bool isTurningLeft = false;
+    private bool isTurningRight = false;
+    private bool isAccelerating = false;
+    private bool isBraking = false;
+
+    private List<OtherCar> otherCars = new();
+    private List<RoadsideObject> roadsideObjects = new();
+    private List<Cloud> clouds = new();
+    private Random random = new();
+
+    private double nextCarSpawn = 500;
+    private double nextObjectSpawn = 100;
+    private double nextCurveChange = 200;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await gameContainer.FocusAsync();
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        InitializeGame();
+    }
+
+    private void InitializeGame()
+    {
+        otherCars.Clear();
+        roadsideObjects.Clear();
+        clouds.Clear();
+
+        // Add initial clouds
+        for (int i = 0; i < 5; i++)
+        {
+            clouds.Add(new Cloud
+            {
+                X = random.Next(0, GameWidth),
+                Y = random.Next(10, 100),
+                Scale = 0.5 + random.NextDouble() * 0.5,
+                Speed = 0.2 + random.NextDouble() * 0.3
+            });
+        }
+
+        // Add initial roadside objects
+        for (int i = 0; i < 10; i++)
+        {
+            SpawnRoadsideObject(i * 200);
+        }
+    }
+
+    private void HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Code == "Space" && !gameStarted && !gameOver)
+        {
+            StartGame();
+            return;
+        }
+
+        if (!gameStarted || gameOver) return;
+
+        switch (e.Code)
+        {
+            case "ArrowLeft":
+                isTurningLeft = true;
+                break;
+            case "ArrowRight":
+                isTurningRight = true;
+                break;
+            case "ArrowUp":
+                isAccelerating = true;
+                break;
+            case "ArrowDown":
+                isBraking = true;
+                break;
+        }
+    }
+
+    private void HandleKeyUp(KeyboardEventArgs e)
+    {
+        switch (e.Code)
+        {
+            case "ArrowLeft":
+                isTurningLeft = false;
+                break;
+            case "ArrowRight":
+                isTurningRight = false;
+                break;
+            case "ArrowUp":
+                isAccelerating = false;
+                break;
+            case "ArrowDown":
+                isBraking = false;
+                break;
+        }
+    }
+
+    private void StartGame()
+    {
+        gameStarted = true;
+        gameOver = false;
+        score = 0;
+        distance = 0;
+        speed = 0;
+        playerX = 0;
+        roadPosition = 0;
+        currentCurve = 0;
+        targetCurve = 0;
+        curveAccumulator = 0;
+        timeRemaining = TimeSpan.FromSeconds(60);
+        lastTick = DateTime.Now;
+        nextCarSpawn = 500;
+        nextObjectSpawn = 100;
+        nextCurveChange = 200;
+
+        InitializeGame();
+
+        gameTimer = new System.Timers.Timer(16);
+        gameTimer.Elapsed += GameLoop;
+        gameTimer.Start();
+    }
+
+    private async void GameLoop(object? sender, ElapsedEventArgs e)
+    {
+        await InvokeAsync(() =>
+        {
+            if (gameOver) return;
+
+            var now = DateTime.Now;
+            var delta = (now - lastTick).TotalSeconds;
+            lastTick = now;
+
+            // Update timer
+            timeRemaining -= TimeSpan.FromSeconds(delta);
+            if (timeRemaining <= TimeSpan.Zero)
+            {
+                timeRemaining = TimeSpan.Zero;
+                EndGame();
+                return;
+            }
+
+            // Handle acceleration/braking
+            if (isAccelerating)
+            {
+                speed = Math.Min(speed + Acceleration, MaxSpeed);
+            }
+            else if (isBraking)
+            {
+                speed = Math.Max(speed - Deceleration * 2, 0);
+            }
+            else
+            {
+                speed = Math.Max(speed - Friction, 0);
+            }
+
+            // Handle steering
+            double steerFactor = speed / MaxSpeed;
+            if (isTurningLeft)
+            {
+                playerX = Math.Max(playerX - SteerSpeed * steerFactor, -MaxSteer);
+            }
+            if (isTurningRight)
+            {
+                playerX = Math.Min(playerX + SteerSpeed * steerFactor, MaxSteer);
+            }
+
+            // Apply curve effect on player
+            playerX += currentCurve * speed * 0.0008;
+            playerX = Math.Clamp(playerX, -MaxSteer - 50, MaxSteer + 50);
+
+            // Update road position
+            double moveDistance = speed * delta * 2;
+            roadPosition += moveDistance;
+            distance += moveDistance;
+
+            // Update horizon
+            horizonOffset += currentCurve * speed * 0.001;
+
+            // Update curve
+            curveAccumulator += moveDistance;
+            if (curveAccumulator >= nextCurveChange)
+            {
+                curveAccumulator = 0;
+                nextCurveChange = 200 + random.Next(300);
+                targetCurve = (random.NextDouble() - 0.5) * 40;
+            }
+            currentCurve += (targetCurve - currentCurve) * 0.01;
+
+            // Score based on speed
+            score += (int)(speed * delta * 0.5);
+
+            // Update clouds
+            foreach (var cloud in clouds)
+            {
+                cloud.X -= cloud.Speed + speed * 0.01;
+                if (cloud.X < -50)
+                {
+                    cloud.X = GameWidth + 50;
+                    cloud.Y = random.Next(10, 100);
+                }
+            }
+
+            // Spawn and update other cars
+            if (distance > nextCarSpawn)
+            {
+                SpawnOtherCar();
+                nextCarSpawn = distance + 300 + random.Next(500);
+            }
+            UpdateOtherCars(moveDistance);
+
+            // Spawn and update roadside objects
+            if (distance > nextObjectSpawn)
+            {
+                SpawnRoadsideObject(1000);
+                nextObjectSpawn = distance + 50 + random.Next(100);
+            }
+            UpdateRoadsideObjects(moveDistance);
+
+            // Check off-road
+            double roadWidth = GetRoadWidthAtPlayer();
+            if (Math.Abs(playerX) > roadWidth / 2 + 20)
+            {
+                speed = Math.Max(speed - 2, 30);
+            }
+
+            // Check collision with other cars
+            CheckCarCollisions();
+
+            StateHasChanged();
+        });
+    }
+
+    private void SpawnOtherCar()
+    {
+        string[] carEmojis = { "🚗", "🚕", "🚙", "🚌", "🏎️", "🚐" };
+        int lane = random.Next(-1, 2);
+        otherCars.Add(new OtherCar
+        {
+            Z = 1000,
+            X = lane * 80,
+            Speed = 30 + random.Next(60),
+            Emoji = carEmojis[random.Next(carEmojis.Length)]
+        });
+    }
+
+    private void UpdateOtherCars(double moveDistance)
+    {
+        for (int i = otherCars.Count - 1; i >= 0; i--)
+        {
+            otherCars[i].Z -= moveDistance - otherCars[i].Speed * 0.016;
+
+            if (otherCars[i].Z < -50)
+            {
+                otherCars.RemoveAt(i);
+                score += 50; // Points for passing a car
+            }
+        }
+    }
+
+    private void SpawnRoadsideObject(double z)
+    {
+        string[] leftObjects = { "🌲", "🌳", "🌴", "🏠", "⛽", "🗼" };
+        string[] rightObjects = { "🌲", "🌳", "🌴", "🏠", "🏪", "🗿" };
+
+        // Spawn on both sides
+        roadsideObjects.Add(new RoadsideObject
+        {
+            Z = z,
+            X = -250 - random.Next(50),
+            Emoji = leftObjects[random.Next(leftObjects.Length)]
+        });
+        roadsideObjects.Add(new RoadsideObject
+        {
+            Z = z,
+            X = 250 + random.Next(50),
+            Emoji = rightObjects[random.Next(rightObjects.Length)]
+        });
+    }
+
+    private void UpdateRoadsideObjects(double moveDistance)
+    {
+        for (int i = roadsideObjects.Count - 1; i >= 0; i--)
+        {
+            roadsideObjects[i].Z -= moveDistance;
+            if (roadsideObjects[i].Z < -50)
+            {
+                roadsideObjects.RemoveAt(i);
+            }
+        }
+    }
+
+    private void CheckCarCollisions()
+    {
+        foreach (var car in otherCars)
+        {
+            if (car.Z < 100 && car.Z > 0)
+            {
+                double carWidth = 40;
+                if (Math.Abs(playerX - car.X) < carWidth)
+                {
+                    EndGame();
+                    return;
+                }
+            }
+        }
+    }
+
+    private RoadSegmentVisual GetRoadSegment(int index)
+    {
+        double z = index * SegmentHeight;
+        double perspective = (z + 1) / (RoadSegments * SegmentHeight);
+        double roadWidth = 100 + perspective * 300;
+
+        int segmentIndex = (int)((roadPosition + z) / 10);
+        bool isStripe = segmentIndex % 2 == 0;
+
+        double curve = currentCurve * perspective * perspective * 2;
+
+        return new RoadSegmentVisual
+        {
+            RoadWidth = roadWidth,
+            IsStripe = isStripe,
+            Curve = curve
+        };
+    }
+
+    private CarVisual GetCarVisual(OtherCar car)
+    {
+        if (car.Z < 0 || car.Z > 1000) return new CarVisual { Visible = false };
+
+        double perspective = 1 - (car.Z / 1000.0);
+        double scale = 0.3 + perspective * 1.5;
+        double screenY = perspective * 250;
+        double screenX = car.X * perspective + currentCurve * (1 - perspective) * 0.5;
+
+        return new CarVisual
+        {
+            Visible = true,
+            ScreenX = screenX,
+            ScreenY = screenY,
+            Scale = scale
+        };
+    }
+
+    private ObjectVisual GetObjectVisual(RoadsideObject obj)
+    {
+        if (obj.Z < 0 || obj.Z > 1000) return new ObjectVisual { Visible = false };
+
+        double perspective = 1 - (obj.Z / 1000.0);
+        double scale = 0.2 + perspective * 1.2;
+        double screenY = perspective * 250;
+        double screenX = obj.X * perspective;
+
+        return new ObjectVisual
+        {
+            Visible = true,
+            ScreenX = screenX,
+            ScreenY = screenY,
+            Scale = scale
+        };
+    }
+
+    private double GetRoadWidthAtPlayer()
+    {
+        return 100 + (1.0 / (RoadSegments * SegmentHeight)) * 300;
+    }
+
+    private void EndGame()
+    {
+        gameOver = true;
+        gameTimer?.Stop();
+        gameTimer?.Dispose();
+        gameTimer = null;
+    }
+
+    private void RestartGame()
+    {
+        StartGame();
+    }
+
+    public void Dispose()
+    {
+        gameTimer?.Stop();
+        gameTimer?.Dispose();
+    }
+
+    private class OtherCar
+    {
+        public double Z { get; set; }
+        public double X { get; set; }
+        public double Speed { get; set; }
+        public string Emoji { get; set; } = "🚗";
+    }
+
+    private class RoadsideObject
+    {
+        public double Z { get; set; }
+        public double X { get; set; }
+        public string Emoji { get; set; } = "🌲";
+    }
+
+    private class Cloud
+    {
+        public double X { get; set; }
+        public double Y { get; set; }
+        public double Scale { get; set; }
+        public double Speed { get; set; }
+    }
+
+    private class RoadSegmentVisual
+    {
+        public double RoadWidth { get; set; }
+        public bool IsStripe { get; set; }
+        public double Curve { get; set; }
+    }
+
+    private class CarVisual
+    {
+        public bool Visible { get; set; }
+        public double ScreenX { get; set; }
+        public double ScreenY { get; set; }
+        public double Scale { get; set; }
+    }
+
+    private class ObjectVisual
+    {
+        public bool Visible { get; set; }
+        public double ScreenX { get; set; }
+        public double ScreenY { get; set; }
+        public double Scale { get; set; }
+    }
+}
