@@ -1,8 +1,653 @@
 ﻿@page "/spaceinvadersgame"
 @rendermode InteractiveAuto
+@using System.Timers
+@implements IDisposable
 
-<h3>SpaceInvadersGame</h3>
+<div class="space-invaders-game" tabindex="0" @onkeydown="HandleKeyDown" @ref="gameContainer">
+    <div class="game-header">
+        <h3>🚀 Space Invaders</h3>
+        <div class="game-stats">
+            <span>Score: @score</span>
+            <span>Lives: @lives</span>
+            <span>Level: @level</span>
+        </div>
+    </div>
+
+    @if (!gameStarted)
+    {
+        <div class="game-overlay">
+            <h2>🛸 Space Invaders</h2>
+            <p>Press SPACE to Start</p>
+            <p>Use ← → to move, SPACE to shoot</p>
+        </div>
+    }
+
+    @if (gameOver)
+    {
+        <div class="game-overlay">
+            <h2>Game Over!</h2>
+            <p>Final Score: @score</p>
+            <button @onclick="RestartGame">Play Again</button>
+        </div>
+    }
+
+    @if (gameWon)
+    {
+        <div class="game-overlay victory">
+            <h2>🎉 Victory!</h2>
+            <p>Final Score: @score</p>
+            <button @onclick="RestartGame">Play Again</button>
+        </div>
+    }
+
+    <div class="game-area">
+        <!-- Player ship -->
+        <div class="player-ship" style="left: @(playerX)px">
+            🚀
+        </div>
+
+        <!-- Player bullets -->
+        @foreach (var bullet in playerBullets)
+        {
+            <div class="bullet player-bullet" style="left: @(bullet.X)px; top: @(bullet.Y)px"></div>
+        }
+
+        <!-- Alien bullets -->
+        @foreach (var bullet in alienBullets)
+        {
+            <div class="bullet alien-bullet" style="left: @(bullet.X)px; top: @(bullet.Y)px"></div>
+        }
+
+        <!-- Aliens -->
+        @foreach (var alien in aliens)
+        {
+            <div class="alien @GetAlienClass(alien.Row)" style="left: @(alien.X)px; top: @(alien.Y)px">
+                @GetAlienEmoji(alien.Row)
+            </div>
+        }
+
+        <!-- Barriers -->
+        @foreach (var barrier in barriers)
+        {
+            @if (barrier.Health > 0)
+            {
+                <div class="barrier" style="left: @(barrier.X)px; top: @(barrier.Y)px; opacity: @(barrier.Health / 4.0)">
+                    🛡️
+                </div>
+            }
+        }
+    </div>
+</div>
+
+<style>
+    .space-invaders-game {
+        width: 100%;
+        max-width: 600px;
+        margin: 0 auto;
+        outline: none;
+        user-select: none;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .game-header {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        color: #00ff88;
+        padding: 15px 20px;
+        border-radius: 10px 10px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: 2px solid #00ff88;
+        border-bottom: none;
+    }
+
+    .game-header h3 {
+        margin: 0;
+        font-size: 1.5rem;
+    }
+
+    .game-stats {
+        display: flex;
+        gap: 25px;
+        font-weight: bold;
+        font-size: 1rem;
+    }
+
+    .game-area {
+        position: relative;
+        width: 100%;
+        height: 500px;
+        background: linear-gradient(180deg, #0a0a1a 0%, #1a1a3e 50%, #0a0a1a 100%);
+        border: 2px solid #00ff88;
+        border-top: none;
+        border-radius: 0 0 10px 10px;
+        overflow: hidden;
+    }
+
+    .game-area::before {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-image: radial-gradient(white 1px, transparent 1px);
+        background-size: 50px 50px;
+        opacity: 0.1;
+    }
+
+    .player-ship {
+        position: absolute;
+        bottom: 20px;
+        font-size: 36px;
+        filter: drop-shadow(0 0 10px #00ff88);
+        transition: left 0.05s ease-out;
+    }
+
+    .alien {
+        position: absolute;
+        font-size: 28px;
+        transition: all 0.1s;
+    }
+
+    .alien-row-0 {
+        filter: drop-shadow(0 0 5px #ff0055);
+    }
+
+    .alien-row-1, .alien-row-2 {
+        filter: drop-shadow(0 0 5px #ff8800);
+    }
+
+    .alien-row-3, .alien-row-4 {
+        filter: drop-shadow(0 0 5px #00ffff);
+    }
+
+    .bullet {
+        position: absolute;
+        width: 4px;
+        height: 15px;
+        border-radius: 2px;
+    }
+
+    .player-bullet {
+        background: linear-gradient(180deg, #00ff88, #00ffcc);
+        box-shadow: 0 0 10px #00ff88;
+    }
+
+    .alien-bullet {
+        background: linear-gradient(180deg, #ff0055, #ff4488);
+        box-shadow: 0 0 10px #ff0055;
+    }
+
+    .barrier {
+        position: absolute;
+        font-size: 32px;
+        filter: drop-shadow(0 0 5px #00ff88);
+    }
+
+    .game-overlay {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0, 0, 0, 0.95);
+        color: #00ff88;
+        padding: 40px 50px;
+        border-radius: 15px;
+        text-align: center;
+        z-index: 100;
+        border: 2px solid #00ff88;
+        box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+    }
+
+    .game-overlay.victory {
+        border-color: #ffd700;
+        color: #ffd700;
+        box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+    }
+
+    .game-overlay h2 {
+        margin-top: 0;
+        font-size: 2rem;
+    }
+
+    .game-overlay p {
+        font-size: 1.1rem;
+        margin: 10px 0;
+    }
+
+    .game-overlay button {
+        margin-top: 20px;
+        padding: 12px 35px;
+        font-size: 18px;
+        background: transparent;
+        color: #00ff88;
+        border: 2px solid #00ff88;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .game-overlay button:hover {
+        background: #00ff88;
+        color: #0a0a1a;
+    }
+
+    .victory button {
+        border-color: #ffd700;
+        color: #ffd700;
+    }
+
+    .victory button:hover {
+        background: #ffd700;
+        color: #0a0a1a;
+    }
+</style>
 
 @code {
+    private ElementReference gameContainer;
+    private System.Timers.Timer? gameTimer;
 
+    private bool gameStarted = false;
+    private bool gameOver = false;
+    private bool gameWon = false;
+    private int score = 0;
+    private int lives = 3;
+    private int level = 1;
+
+    private const int GameWidth = 600;
+    private const int GameHeight = 500;
+    private const int PlayerWidth = 36;
+    private const int AlienWidth = 28;
+    private const int AlienHeight = 28;
+
+    private int playerX = 280;
+    private int playerSpeed = 8;
+
+    private List<Alien> aliens = new();
+    private List<Bullet> playerBullets = new();
+    private List<Bullet> alienBullets = new();
+    private List<Barrier> barriers = new();
+
+    private int alienDirection = 1;
+    private int alienMoveCounter = 0;
+    private int alienShootCounter = 0;
+    private Random random = new();
+
+    private DateTime lastShotTime = DateTime.MinValue;
+    private TimeSpan shootCooldown = TimeSpan.FromMilliseconds(300);
+
+    protected override void OnInitialized()
+    {
+        InitializeGame();
+    }
+
+    private void InitializeGame()
+    {
+        aliens.Clear();
+        playerBullets.Clear();
+        alienBullets.Clear();
+        barriers.Clear();
+
+        // Create alien grid (5 rows x 11 columns)
+        for (int row = 0; row < 5; row++)
+        {
+            for (int col = 0; col < 11; col++)
+            {
+                aliens.Add(new Alien
+                {
+                    X = 50 + col * 45,
+                    Y = 50 + row * 40,
+                    Row = row
+                });
+            }
+        }
+
+        // Create barriers
+        int[] barrierPositions = { 80, 200, 320, 440 };
+        foreach (var pos in barrierPositions)
+        {
+            barriers.Add(new Barrier { X = pos, Y = 400, Health = 4 });
+        }
+
+        playerX = 280;
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Code == "Space" && !gameStarted && !gameOver && !gameWon)
+        {
+            StartGame();
+            return;
+        }
+
+        if (!gameStarted || gameOver || gameWon) return;
+
+        switch (e.Code)
+        {
+            case "ArrowLeft":
+                playerX = Math.Max(10, playerX - playerSpeed);
+                break;
+            case "ArrowRight":
+                playerX = Math.Min(GameWidth - PlayerWidth - 10, playerX + playerSpeed);
+                break;
+            case "Space":
+                Shoot();
+                break;
+        }
+    }
+
+    private void Shoot()
+    {
+        if (DateTime.Now - lastShotTime < shootCooldown) return;
+
+        playerBullets.Add(new Bullet
+        {
+            X = playerX + PlayerWidth / 2 - 2,
+            Y = GameHeight - 60
+        });
+        lastShotTime = DateTime.Now;
+    }
+
+    private void StartGame()
+    {
+        gameStarted = true;
+        gameOver = false;
+        gameWon = false;
+        score = 0;
+        lives = 3;
+        level = 1;
+        alienMoveCounter = 0;
+        alienShootCounter = 0;
+
+        InitializeGame();
+
+        gameTimer = new System.Timers.Timer(16);
+        gameTimer.Elapsed += GameLoop;
+        gameTimer.Start();
+    }
+
+    private async void GameLoop(object? sender, ElapsedEventArgs e)
+    {
+        await InvokeAsync(() =>
+        {
+            if (gameOver || gameWon) return;
+
+            alienMoveCounter++;
+            alienShootCounter++;
+
+            // Update player bullets
+            UpdatePlayerBullets();
+
+            // Update alien bullets
+            UpdateAlienBullets();
+
+            // Move aliens
+            if (alienMoveCounter % (30 - Math.Min(level * 2, 20)) == 0)
+            {
+                MoveAliens();
+            }
+
+            // Alien shooting
+            if (alienShootCounter % 60 == 0 && aliens.Count > 0)
+            {
+                AlienShoot();
+            }
+
+            // Check win condition
+            if (aliens.Count == 0)
+            {
+                LevelUp();
+            }
+
+            StateHasChanged();
+        });
+    }
+
+    private void UpdatePlayerBullets()
+    {
+        for (int i = playerBullets.Count - 1; i >= 0; i--)
+        {
+            playerBullets[i].Y -= 8;
+
+            // Remove off-screen bullets
+            if (playerBullets[i].Y < 0)
+            {
+                playerBullets.RemoveAt(i);
+                continue;
+            }
+
+            // Check collision with aliens
+            for (int j = aliens.Count - 1; j >= 0; j--)
+            {
+                if (CheckBulletAlienCollision(playerBullets[i], aliens[j]))
+                {
+                    score += GetAlienScore(aliens[j].Row);
+                    aliens.RemoveAt(j);
+                    playerBullets.RemoveAt(i);
+                    break;
+                }
+            }
+
+            // Check collision with barriers
+            if (i < playerBullets.Count)
+            {
+                foreach (var barrier in barriers)
+                {
+                    if (barrier.Health > 0 && CheckBulletBarrierCollision(playerBullets[i], barrier))
+                    {
+                        barrier.Health--;
+                        playerBullets.RemoveAt(i);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    private void UpdateAlienBullets()
+    {
+        for (int i = alienBullets.Count - 1; i >= 0; i--)
+        {
+            alienBullets[i].Y += 5;
+
+            // Remove off-screen bullets
+            if (alienBullets[i].Y > GameHeight)
+            {
+                alienBullets.RemoveAt(i);
+                continue;
+            }
+
+            // Check collision with player
+            if (CheckBulletPlayerCollision(alienBullets[i]))
+            {
+                alienBullets.RemoveAt(i);
+                lives--;
+                if (lives <= 0)
+                {
+                    EndGame();
+                }
+                continue;
+            }
+
+            // Check collision with barriers
+            foreach (var barrier in barriers)
+            {
+                if (barrier.Health > 0 && CheckBulletBarrierCollision(alienBullets[i], barrier))
+                {
+                    barrier.Health--;
+                    alienBullets.RemoveAt(i);
+                    break;
+                }
+            }
+        }
+    }
+
+    private void MoveAliens()
+    {
+        bool shouldDescend = false;
+
+        foreach (var alien in aliens)
+        {
+            if ((alienDirection > 0 && alien.X > GameWidth - 80) ||
+                (alienDirection < 0 && alien.X < 30))
+            {
+                shouldDescend = true;
+                break;
+            }
+        }
+
+        if (shouldDescend)
+        {
+            alienDirection *= -1;
+            foreach (var alien in aliens)
+            {
+                alien.Y += 20;
+
+                // Check if aliens reached bottom
+                if (alien.Y > GameHeight - 100)
+                {
+                    EndGame();
+                    return;
+                }
+            }
+        }
+        else
+        {
+            foreach (var alien in aliens)
+            {
+                alien.X += alienDirection * 10;
+            }
+        }
+    }
+
+    private void AlienShoot()
+    {
+        if (aliens.Count == 0) return;
+
+        // Find bottom aliens in each column
+        var bottomAliens = aliens
+            .GroupBy(a => a.X / 45)
+            .Select(g => g.OrderByDescending(a => a.Y).First())
+            .ToList();
+
+        if (bottomAliens.Count > 0)
+        {
+            var shooter = bottomAliens[random.Next(bottomAliens.Count)];
+            alienBullets.Add(new Bullet
+            {
+                X = shooter.X + AlienWidth / 2,
+                Y = shooter.Y + AlienHeight
+            });
+        }
+    }
+
+    private bool CheckBulletAlienCollision(Bullet bullet, Alien alien)
+    {
+        return bullet.X >= alien.X && bullet.X <= alien.X + AlienWidth &&
+               bullet.Y >= alien.Y && bullet.Y <= alien.Y + AlienHeight;
+    }
+
+    private bool CheckBulletPlayerCollision(Bullet bullet)
+    {
+        return bullet.X >= playerX && bullet.X <= playerX + PlayerWidth &&
+               bullet.Y >= GameHeight - 60 && bullet.Y <= GameHeight - 20;
+    }
+
+    private bool CheckBulletBarrierCollision(Bullet bullet, Barrier barrier)
+    {
+        return bullet.X >= barrier.X && bullet.X <= barrier.X + 32 &&
+               bullet.Y >= barrier.Y && bullet.Y <= barrier.Y + 32;
+    }
+
+    private void LevelUp()
+    {
+        level++;
+        if (level > 5)
+        {
+            gameWon = true;
+            gameTimer?.Stop();
+            return;
+        }
+
+        // Reinitialize aliens for next level
+        aliens.Clear();
+        playerBullets.Clear();
+        alienBullets.Clear();
+
+        for (int row = 0; row < 5; row++)
+        {
+            for (int col = 0; col < 11; col++)
+            {
+                aliens.Add(new Alien
+                {
+                    X = 50 + col * 45,
+                    Y = 50 + row * 40,
+                    Row = row
+                });
+            }
+        }
+
+        alienDirection = 1;
+    }
+
+    private void EndGame()
+    {
+        gameOver = true;
+        gameTimer?.Stop();
+    }
+
+    private void RestartGame()
+    {
+        StartGame();
+    }
+
+    private int GetAlienScore(int row)
+    {
+        return row switch
+        {
+            0 => 30,
+            1 or 2 => 20,
+            _ => 10
+        };
+    }
+
+    private string GetAlienEmoji(int row)
+    {
+        return row switch
+        {
+            0 => "👾",
+            1 or 2 => "👽",
+            _ => "🛸"
+        };
+    }
+
+    private string GetAlienClass(int row)
+    {
+        return $"alien-row-{row}";
+    }
+
+    public void Dispose()
+    {
+        gameTimer?.Stop();
+        gameTimer?.Dispose();
+    }
+
+    private class Alien
+    {
+        public int X { get; set; }
+        public int Y { get; set; }
+        public int Row { get; set; }
+    }
+
+    private class Bullet
+    {
+        public int X { get; set; }
+        public int Y { get; set; }
+    }
+
+    private class Barrier
+    {
+        public int X { get; set; }
+        public int Y { get; set; }
+        public int Health { get; set; }
+    }
 }
