@@ -1,7 +1,358 @@
 ﻿@page "/chessgame"
+@rendermode InteractiveAuto
 
-<h3>ChessGame</h3>
+<div class="chess-container">
+    <h3>Chess Game</h3>
+
+    <div class="game-info">
+        <p><strong>Current Turn:</strong> @CurrentPlayer</p>
+        @if (selectedSquare != null)
+        {
+            <p><strong>Selected:</strong> @($"{(char)('a' + selectedSquare.Value.col)}{8 - selectedSquare.Value.row}")</p>
+        }
+        @if (!string.IsNullOrEmpty(gameMessage))
+        {
+            <p class="game-message">@gameMessage</p>
+        }
+    </div>
+
+    <div class="chess-board">
+        @for (int row = 0; row < 8; row++)
+        {
+            @for (int col = 0; col < 8; col++)
+            {
+                var r = row;
+                var c = col;
+                var isLight = (row + col) % 2 == 0;
+                var isSelected = selectedSquare.HasValue && selectedSquare.Value.row == r && selectedSquare.Value.col == c;
+                var isValidMove = validMoves.Any(m => m.row == r && m.col == c);
+                var squareClass = $"square {(isLight ? "light" : "dark")} {(isSelected ? "selected" : "")} {(isValidMove ? "valid-move" : "")}";
+
+                <div class="@squareClass" @onclick="() => OnSquareClick(r, c)">
+                    <span class="piece">@GetPieceSymbol(board[r, c])</span>
+                </div>
+            }
+        }
+    </div>
+
+    <button class="btn-reset" @onclick="ResetGame">New Game</button>
+</div>
+
+<style>
+    .chess-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        font-family: Arial, sans-serif;
+    }
+
+    .game-info {
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .game-message {
+        color: #d32f2f;
+        font-weight: bold;
+    }
+
+    .chess-board {
+        display: grid;
+        grid-template-columns: repeat(8, 60px);
+        grid-template-rows: repeat(8, 60px);
+        border: 3px solid #333;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .square {
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        position: relative;
+    }
+
+    .square.light {
+        background-color: #f0d9b5;
+    }
+
+    .square.dark {
+        background-color: #b58863;
+    }
+
+    .square:hover {
+        opacity: 0.8;
+    }
+
+    .square.selected {
+        background-color: #7fc97f !important;
+        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .square.valid-move::after {
+        content: '';
+        position: absolute;
+        width: 15px;
+        height: 15px;
+        background-color: rgba(0, 128, 0, 0.5);
+        border-radius: 50%;
+    }
+
+    .piece {
+        font-size: 40px;
+        user-select: none;
+    }
+
+    .btn-reset {
+        margin-top: 20px;
+        padding: 10px 20px;
+        font-size: 16px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .btn-reset:hover {
+        background-color: #45a049;
+    }
+</style>
 
 @code {
+    private string[,] board = new string[8, 8];
+    private (int row, int col)? selectedSquare = null;
+    private List<(int row, int col)> validMoves = new();
+    private string CurrentPlayer = "White";
+    private string gameMessage = "";
 
+    protected override void OnInitialized()
+    {
+        InitializeBoard();
+    }
+
+    private void InitializeBoard()
+    {
+        // Clear board
+        for (int i = 0; i < 8; i++)
+        {
+            for (int j = 0; j < 8; j++)
+            {
+                board[i, j] = "";
+            }
+        }
+
+        // Black pieces (top)
+        board[0, 0] = "♜"; board[0, 1] = "♞"; board[0, 2] = "♝"; board[0, 3] = "♛";
+        board[0, 4] = "♚"; board[0, 5] = "♝"; board[0, 6] = "♞"; board[0, 7] = "♜";
+        for (int i = 0; i < 8; i++) board[1, i] = "♟";
+
+        // White pieces (bottom)
+        for (int i = 0; i < 8; i++) board[6, i] = "♙";
+        board[7, 0] = "♖"; board[7, 1] = "♘"; board[7, 2] = "♗"; board[7, 3] = "♕";
+        board[7, 4] = "♔"; board[7, 5] = "♗"; board[7, 6] = "♘"; board[7, 7] = "♖";
+
+        CurrentPlayer = "White";
+        selectedSquare = null;
+        validMoves.Clear();
+        gameMessage = "";
+    }
+
+    private string GetPieceSymbol(string piece)
+    {
+        return piece;
+    }
+
+    private void OnSquareClick(int row, int col)
+    {
+        if (selectedSquare == null)
+        {
+            // Select a piece
+            if (!string.IsNullOrEmpty(board[row, col]) && IsCurrentPlayerPiece(board[row, col]))
+            {
+                selectedSquare = (row, col);
+                validMoves = GetValidMoves(row, col);
+                gameMessage = "";
+            }
+        }
+        else
+        {
+            // Try to move
+            if (validMoves.Any(m => m.row == row && m.col == col))
+            {
+                // Valid move
+                board[row, col] = board[selectedSquare.Value.row, selectedSquare.Value.col];
+                board[selectedSquare.Value.row, selectedSquare.Value.col] = "";
+                CurrentPlayer = CurrentPlayer == "White" ? "Black" : "White";
+                selectedSquare = null;
+                validMoves.Clear();
+                gameMessage = "";
+            }
+            else if (row == selectedSquare.Value.row && col == selectedSquare.Value.col)
+            {
+                // Deselect
+                selectedSquare = null;
+                validMoves.Clear();
+            }
+            else if (!string.IsNullOrEmpty(board[row, col]) && IsCurrentPlayerPiece(board[row, col]))
+            {
+                // Select different piece
+                selectedSquare = (row, col);
+                validMoves = GetValidMoves(row, col);
+            }
+            else
+            {
+                gameMessage = "Invalid move!";
+            }
+        }
+    }
+
+    private bool IsCurrentPlayerPiece(string piece)
+    {
+        if (string.IsNullOrEmpty(piece)) return false;
+
+        // White pieces: ♔♕♖♗♘♙
+        // Black pieces: ♚♛♜♝♞♟
+        bool isWhite = "♔♕♖♗♘♙".Contains(piece);
+        bool isBlack = "♚♛♜♝♞♟".Contains(piece);
+
+        return (CurrentPlayer == "White" && isWhite) || (CurrentPlayer == "Black" && isBlack);
+    }
+
+    private List<(int row, int col)> GetValidMoves(int row, int col)
+    {
+        var moves = new List<(int row, int col)>();
+        string piece = board[row, col];
+
+        if (string.IsNullOrEmpty(piece)) return moves;
+
+        switch (piece)
+        {
+            case "♙": // White pawn
+                AddPawnMoves(moves, row, col, -1);
+                break;
+            case "♟": // Black pawn
+                AddPawnMoves(moves, row, col, 1);
+                break;
+            case "♖": case "♜": // Rook
+                AddLinearMoves(moves, row, col, new[] { (-1, 0), (1, 0), (0, -1), (0, 1) });
+                break;
+            case "♘": case "♞": // Knight
+                AddKnightMoves(moves, row, col);
+                break;
+            case "♗": case "♝": // Bishop
+                AddLinearMoves(moves, row, col, new[] { (-1, -1), (-1, 1), (1, -1), (1, 1) });
+                break;
+            case "♕": case "♛": // Queen
+                AddLinearMoves(moves, row, col, new[] { (-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1) });
+                break;
+            case "♔": case "♚": // King
+                AddKingMoves(moves, row, col);
+                break;
+        }
+
+        return moves;
+    }
+
+    private void AddPawnMoves(List<(int row, int col)> moves, int row, int col, int direction)
+    {
+        // Forward move
+        if (IsValidSquare(row + direction, col) && string.IsNullOrEmpty(board[row + direction, col]))
+        {
+            moves.Add((row + direction, col));
+
+            // Double move from starting position
+            int startRow = direction == -1 ? 6 : 1;
+            if (row == startRow && string.IsNullOrEmpty(board[row + 2 * direction, col]))
+            {
+                moves.Add((row + 2 * direction, col));
+            }
+        }
+
+        // Diagonal captures
+        foreach (int dcol in new[] { -1, 1 })
+        {
+            int newRow = row + direction;
+            int newCol = col + dcol;
+            if (IsValidSquare(newRow, newCol) && !string.IsNullOrEmpty(board[newRow, newCol]) && !IsCurrentPlayerPiece(board[newRow, newCol]))
+            {
+                moves.Add((newRow, newCol));
+            }
+        }
+    }
+
+    private void AddLinearMoves(List<(int row, int col)> moves, int row, int col, (int drow, int dcol)[] directions)
+    {
+        foreach (var (drow, dcol) in directions)
+        {
+            int r = row + drow;
+            int c = col + dcol;
+
+            while (IsValidSquare(r, c))
+            {
+                if (string.IsNullOrEmpty(board[r, c]))
+                {
+                    moves.Add((r, c));
+                }
+                else
+                {
+                    if (!IsCurrentPlayerPiece(board[r, c]))
+                    {
+                        moves.Add((r, c));
+                    }
+                    break;
+                }
+                r += drow;
+                c += dcol;
+            }
+        }
+    }
+
+    private void AddKnightMoves(List<(int row, int col)> moves, int row, int col)
+    {
+        int[][] offsets = { new[] { -2, -1 }, new[] { -2, 1 }, new[] { -1, -2 }, new[] { -1, 2 },
+                           new[] { 1, -2 }, new[] { 1, 2 }, new[] { 2, -1 }, new[] { 2, 1 } };
+
+        foreach (var offset in offsets)
+        {
+            int newRow = row + offset[0];
+            int newCol = col + offset[1];
+            if (IsValidSquare(newRow, newCol) && (string.IsNullOrEmpty(board[newRow, newCol]) || !IsCurrentPlayerPiece(board[newRow, newCol])))
+            {
+                moves.Add((newRow, newCol));
+            }
+        }
+    }
+
+    private void AddKingMoves(List<(int row, int col)> moves, int row, int col)
+    {
+        for (int drow = -1; drow <= 1; drow++)
+        {
+            for (int dcol = -1; dcol <= 1; dcol++)
+            {
+                if (drow == 0 && dcol == 0) continue;
+
+                int newRow = row + drow;
+                int newCol = col + dcol;
+                if (IsValidSquare(newRow, newCol) && (string.IsNullOrEmpty(board[newRow, newCol]) || !IsCurrentPlayerPiece(board[newRow, newCol])))
+                {
+                    moves.Add((newRow, newCol));
+                }
+            }
+        }
+    }
+
+    private bool IsValidSquare(int row, int col)
+    {
+        return row >= 0 && row < 8 && col >= 0 && col < 8;
+    }
+
+    private void ResetGame()
+    {
+        InitializeBoard();
+    }
 }
