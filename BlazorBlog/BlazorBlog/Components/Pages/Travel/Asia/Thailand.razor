@@ -4,15 +4,19 @@
 <h3>Thailand - April 2024</h3>
 
 <div class="container mt-4">
-    <p class="lead">Photo gallery from our trip to Thailand in April 2024</p>
+    <p class="lead">Photo gallery from our trip to Thailand in April 2024 (@photos.Count photos)</p>
 
-    <div class="gallery-grid">
-        @foreach (var photo in photos)
-        {
-            <div class="gallery-item" @onclick="() => OpenLightbox(photo)">
-                <img src="@photo" alt="Thailand April 2024" loading="lazy" />
+    <div class="gallery-container">
+        <Virtualize Items="@photoRows" Context="row" ItemSize="220" OverscanCount="2">
+            <div class="gallery-row">
+                @foreach (var photo in row)
+                {
+                    <div class="gallery-item" @onclick="() => OpenLightbox(photo)">
+                        <img src="@photo" alt="Thailand April 2024" loading="lazy" />
+                    </div>
+                }
             </div>
-        }
+        </Virtualize>
     </div>
 </div>
 
@@ -30,15 +34,22 @@
 }
 
 <style>
-    .gallery-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    .gallery-container {
+        height: 80vh;
+        overflow-y: auto;
+    }
+
+    .gallery-row {
+        display: flex;
         gap: 10px;
-        padding: 10px;
+        padding: 5px 10px;
+        justify-content: flex-start;
     }
 
     .gallery-item {
-        aspect-ratio: 1;
+        width: 200px;
+        height: 200px;
+        flex-shrink: 0;
         overflow: hidden;
         cursor: pointer;
         border-radius: 8px;
@@ -129,9 +140,11 @@
     [Inject] private IWebHostEnvironment WebHostEnvironment { get; set; } = default!;
 
     private List<string> photos = new();
+    private List<List<string>> photoRows = new();
     private bool showLightbox = false;
     private string selectedPhoto = string.Empty;
     private int currentIndex = 0;
+    private const int PhotosPerRow = 5;
 
     protected override void OnInitialized()
     {
@@ -147,6 +160,13 @@
                 .ToList();
 
             photos = imageFiles!;
+
+            // Group photos into rows for virtualization
+            photoRows = photos
+                .Select((photo, index) => new { photo, index })
+                .GroupBy(x => x.index / PhotosPerRow)
+                .Select(g => g.Select(x => x.photo).ToList())
+                .ToList();
         }
     }
 
