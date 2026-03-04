@@ -49,3 +49,11 @@ yarn-error.log
 
 ## Azure
 PublishProfiles/
+
+## Photos
+wwwroot/travel-pics/*.jpg
+wwwroot/travel-pics/*.jpeg
+wwwroot/travel-pics/*.png
+wwwroot/travel-pics/*.gif
+wwwroot/travel-pics/*.webp
+wwwroot/travel-pics/*.bmp
