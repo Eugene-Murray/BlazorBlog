@@ -40,7 +40,14 @@ builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSe
 builder.Services.AddScoped<BlogService>();
 builder.Services.AddScoped<AdminClaimsService>();
 
+// Register Alpha Vantage service for stock screener
+builder.Services.AddHttpClient<AlphaVantageService>();
+
+// Register Massive stock service for stock screener
+builder.Services.AddHttpClient<MassiveStockService>();
+
 var app = builder.Build();
+
 
 // Create roles on startup
 using (var scope = app.Services.CreateScope())

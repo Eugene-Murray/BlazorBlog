@@ -17,4 +17,8 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\travel-pics\" />
+  </ItemGroup>
+
 </Project>

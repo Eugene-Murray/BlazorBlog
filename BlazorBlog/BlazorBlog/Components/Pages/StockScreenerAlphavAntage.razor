@@ -1,0 +1,625 @@
+﻿@page "/stock-screener-alphav-antage"
+@using BlazorBlog.Models.AlphaVantage
+@using BlazorBlog.Services
+@using Microsoft.AspNetCore.Components.Web
+@inject AlphaVantageService AlphaVantage
+@inject ILogger<StockScreenerAlphavAntage> Logger
+@rendermode InteractiveServer
+
+<PageTitle>Stock Screener - Alpha Vantage</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <h2 class="text-primary">
+                <i class="bi bi-graph-up-arrow me-2"></i>Stock Screener
+            </h2>
+            <p class="text-muted">Powered by Alpha Vantage API</p>
+        </div>
+    </div>
+
+    @* Filter Panel *@
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="bi bi-funnel me-2"></i>Screener Filters
+            </h5>
+            <button class="btn btn-sm btn-outline-light" @onclick="ToggleFilters">
+                <i class="bi @(showFilters ? "bi-chevron-up" : "bi-chevron-down")"></i>
+            </button>
+        </div>
+        @if (showFilters)
+        {
+            <div class="card-body">
+                <div class="row g-3">
+                    @* Row 1: Descriptive Filters *@
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Exchange</label>
+                        <select class="form-select" @bind="filters.Exchange">
+                            <option value="">Any</option>
+                            @foreach (var exchange in Exchanges.All)
+                            {
+                                <option value="@exchange">@exchange</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Market Cap</label>
+                        <select class="form-select" @bind="filters.MarketCap">
+                            <option value="@MarketCapFilter.Any">Any</option>
+                            <option value="@MarketCapFilter.MegaCap">Mega ($200B+)</option>
+                            <option value="@MarketCapFilter.LargeCap">Large ($10B-$200B)</option>
+                            <option value="@MarketCapFilter.MidCap">Mid ($2B-$10B)</option>
+                            <option value="@MarketCapFilter.SmallCap">Small ($300M-$2B)</option>
+                            <option value="@MarketCapFilter.MicroCap">Micro ($50M-$300M)</option>
+                            <option value="@MarketCapFilter.NanoCap">Nano (&lt;$50M)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Sector</label>
+                        <select class="form-select" @bind="filters.Sector">
+                            <option value="">Any</option>
+                            @foreach (var sector in Sectors.All)
+                            {
+                                <option value="@sector">@sector</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Price Change</label>
+                        <select class="form-select" @bind="filters.ChangeFilter">
+                            <option value="@ChangeFilter.Any">Any</option>
+                            <option value="@ChangeFilter.Up">Up</option>
+                            <option value="@ChangeFilter.Down">Down</option>
+                            <option value="@ChangeFilter.UpMoreThan5Percent">Up &gt; 5%</option>
+                            <option value="@ChangeFilter.DownMoreThan5Percent">Down &gt; 5%</option>
+                            <option value="@ChangeFilter.UpMoreThan10Percent">Up &gt; 10%</option>
+                            <option value="@ChangeFilter.DownMoreThan10Percent">Down &gt; 10%</option>
+                        </select>
+                    </div>
+
+                    @* Row 2: Price & Volume *@
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">Min Price ($)</label>
+                        <input type="number" class="form-control" @bind="filters.MinPrice" placeholder="Any" step="0.01" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">Max Price ($)</label>
+                        <input type="number" class="form-control" @bind="filters.MaxPrice" placeholder="Any" step="0.01" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">Min Volume</label>
+                        <select class="form-select" @bind="selectedMinVolume">
+                            <option value="0">Any</option>
+                            <option value="100000">100K+</option>
+                            <option value="500000">500K+</option>
+                            <option value="1000000">1M+</option>
+                            <option value="5000000">5M+</option>
+                            <option value="10000000">10M+</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">52 Week Performance</label>
+                        <select class="form-select" @bind="filters.Week52Performance">
+                            <option value="@Week52Performance.Any">Any</option>
+                            <option value="@Week52Performance.Near52WeekHigh">Near 52W High</option>
+                            <option value="@Week52Performance.Near52WeekLow">Near 52W Low</option>
+                            <option value="@Week52Performance.Above50DayMA">Above 50 Day MA</option>
+                            <option value="@Week52Performance.Below50DayMA">Below 50 Day MA</option>
+                            <option value="@Week52Performance.Above200DayMA">Above 200 Day MA</option>
+                            <option value="@Week52Performance.Below200DayMA">Below 200 Day MA</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Industry</label>
+                        <input type="text" class="form-control" @bind="filters.Industry" placeholder="e.g., Software" />
+                    </div>
+
+                    @* Row 3: Fundamental Filters *@
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">Min P/E</label>
+                        <input type="number" class="form-control" @bind="filters.MinPE" placeholder="Any" step="0.1" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">Max P/E</label>
+                        <input type="number" class="form-control" @bind="filters.MaxPE" placeholder="Any" step="0.1" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">Min Div Yield (%)</label>
+                        <input type="number" class="form-control" @bind="filters.MinDividendYield" placeholder="Any" step="0.1" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">Min EPS ($)</label>
+                        <input type="number" class="form-control" @bind="filters.MinEPS" placeholder="Any" step="0.01" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">Min Beta</label>
+                        <input type="number" class="form-control" @bind="filters.MinBeta" placeholder="Any" step="0.1" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">Max Beta</label>
+                        <input type="number" class="form-control" @bind="filters.MaxBeta" placeholder="Any" step="0.1" />
+                    </div>
+
+                    @* Row 4: Additional Filters *@
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">Min Profit Margin (%)</label>
+                        <input type="number" class="form-control" @bind="filters.MinProfitMargin" placeholder="Any" step="0.1" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">Min ROE (%)</label>
+                        <input type="number" class="form-control" @bind="filters.MinROE" placeholder="Any" step="0.1" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">Max P/B Ratio</label>
+                        <input type="number" class="form-control" @bind="filters.MaxPriceToBook" placeholder="Any" step="0.1" />
+                    </div>
+                </div>
+
+                @* Custom Symbols Input *@
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <label class="form-label fw-bold">Custom Symbols (comma-separated)</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" @bind="customSymbolsInput" 
+                                   placeholder="e.g., AAPL, MSFT, GOOGL (leave empty to use popular stocks)" />
+                            <button class="btn btn-outline-secondary" type="button" @onclick="ClearCustomSymbols">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </div>
+                        <small class="text-muted">Leave empty to screen popular US stocks</small>
+                    </div>
+                </div>
+
+                @* Action Buttons *@
+                <div class="row mt-4">
+                    <div class="col-12 d-flex gap-2">
+                        <button class="btn btn-primary" @onclick="RunScreener" disabled="@isLoading">
+                            @if (isLoading)
+                            {
+                                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                <span>Screening...</span>
+                            }
+                            else
+                            {
+                                <i class="bi bi-search me-2"></i>
+                                <span>Run Screener</span>
+                            }
+                        </button>
+                        <button class="btn btn-outline-secondary" @onclick="ResetFilters" disabled="@isLoading">
+                            <i class="bi bi-arrow-counterclockwise me-2"></i>Reset Filters
+                        </button>
+                        <button class="btn btn-outline-info" @onclick="LoadTopGainersLosers" disabled="@isLoading">
+                            <i class="bi bi-trophy me-2"></i>Top Gainers/Losers
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    @* Symbol Search *@
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0"><i class="bi bi-search me-2"></i>Quick Symbol Lookup</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <input type="text" class="form-control" @bind="searchKeyword" @bind:event="oninput"
+                               placeholder="Search company or symbol..." @onkeyup="HandleSearchKeyUp" />
+                        <button type="button" class="btn btn-primary" @onclick="SearchSymbols" disabled="@isSearching">
+                            @if (isSearching)
+                            {
+                                <span class="spinner-border spinner-border-sm"></span>
+                            }
+                            else
+                            {
+                                <i class="bi bi-search"></i>
+                            }
+                        </button>
+                    </div>
+                </div>
+            </div>
+            @if (searchResults.Any())
+            {
+                <div class="mt-3">
+                    <table class="table table-sm table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Symbol</th>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Region</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var match in searchResults.Take(10))
+                            {
+                                <tr>
+                                    <td><strong>@match.Symbol</strong></td>
+                                    <td>@match.Name</td>
+                                    <td><span class="badge bg-info">@match.Type</span></td>
+                                    <td>@match.Region</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary" @onclick="() => AddToCustomSymbols(match.Symbol)">
+                                            <i class="bi bi-plus"></i> Add
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    @* Top Gainers/Losers Section *@
+    @if (topGainersLosers != null)
+    {
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card shadow-sm border-success">
+                    <div class="card-header bg-success text-white">
+                        <h6 class="mb-0"><i class="bi bi-graph-up-arrow me-2"></i>Top Gainers</h6>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                            <table class="table table-sm table-hover mb-0">
+                                <thead class="table-light sticky-top">
+                                    <tr>
+                                        <th>Symbol</th>
+                                        <th>Price</th>
+                                        <th>Change</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (topGainersLosers.TopGainers != null)
+                                    {
+                                        @foreach (var stock in topGainersLosers.TopGainers.Take(10))
+                                        {
+                                            <tr>
+                                                <td><strong>@stock.Ticker</strong></td>
+                                                <td>$@stock.Price</td>
+                                                <td class="text-success">+@stock.ChangePercentage</td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card shadow-sm border-danger">
+                    <div class="card-header bg-danger text-white">
+                        <h6 class="mb-0"><i class="bi bi-graph-down-arrow me-2"></i>Top Losers</h6>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                            <table class="table table-sm table-hover mb-0">
+                                <thead class="table-light sticky-top">
+                                    <tr>
+                                        <th>Symbol</th>
+                                        <th>Price</th>
+                                        <th>Change</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (topGainersLosers.TopLosers != null)
+                                    {
+                                        @foreach (var stock in topGainersLosers.TopLosers.Take(10))
+                                        {
+                                            <tr>
+                                                <td><strong>@stock.Ticker</strong></td>
+                                                <td>$@stock.Price</td>
+                                                <td class="text-danger">@stock.ChangePercentage</td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card shadow-sm border-primary">
+                    <div class="card-header bg-primary text-white">
+                        <h6 class="mb-0"><i class="bi bi-activity me-2"></i>Most Active</h6>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                            <table class="table table-sm table-hover mb-0">
+                                <thead class="table-light sticky-top">
+                                    <tr>
+                                        <th>Symbol</th>
+                                        <th>Price</th>
+                                        <th>Volume</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (topGainersLosers.MostActivelyTraded != null)
+                                    {
+                                        @foreach (var stock in topGainersLosers.MostActivelyTraded.Take(10))
+                                        {
+                                            <tr>
+                                                <td><strong>@stock.Ticker</strong></td>
+                                                <td>$@stock.Price</td>
+                                                <td>@FormatVolume(stock.VolumeValue)</td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    @* Results Section *@
+    @if (screenerResults.Any())
+    {
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="bi bi-table me-2"></i>Screener Results
+                    <span class="badge bg-light text-dark ms-2">@screenerResults.Count stocks</span>
+                </h5>
+                <div class="btn-group">
+                    <button class="btn btn-sm btn-outline-light" @onclick="() => SortResults(nameof(ScreenerResult.ChangePercent))">
+                        <i class="bi bi-sort-numeric-down"></i> Change %
+                    </button>
+                    <button class="btn btn-sm btn-outline-light" @onclick="() => SortResults(nameof(ScreenerResult.MarketCap))">
+                        <i class="bi bi-sort-numeric-down"></i> Market Cap
+                    </button>
+                    <button class="btn btn-sm btn-outline-light" @onclick="() => SortResults(nameof(ScreenerResult.PE))">
+                        <i class="bi bi-sort-numeric-down"></i> P/E
+                    </button>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover mb-0">
+                        <thead class="table-dark sticky-top">
+                            <tr>
+                                <th class="cursor-pointer" @onclick="() => SortResults(nameof(ScreenerResult.Symbol))">Symbol</th>
+                                <th>Company</th>
+                                <th>Sector</th>
+                                <th class="text-end cursor-pointer" @onclick="() => SortResults(nameof(ScreenerResult.Price))">Price</th>
+                                <th class="text-end cursor-pointer" @onclick="() => SortResults(nameof(ScreenerResult.ChangePercent))">Change %</th>
+                                <th class="text-end cursor-pointer" @onclick="() => SortResults(nameof(ScreenerResult.Volume))">Volume</th>
+                                <th class="text-end cursor-pointer" @onclick="() => SortResults(nameof(ScreenerResult.MarketCap))">Mkt Cap</th>
+                                <th class="text-end cursor-pointer" @onclick="() => SortResults(nameof(ScreenerResult.PE))">P/E</th>
+                                <th class="text-end">EPS</th>
+                                <th class="text-end">Div %</th>
+                                <th class="text-end">Beta</th>
+                                <th class="text-end">52W High</th>
+                                <th class="text-end">52W Low</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var result in screenerResults)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong class="text-primary">@result.Symbol</strong>
+                                        <br />
+                                        <small class="text-muted">@result.Exchange</small>
+                                    </td>
+                                    <td>
+                                        @result.CompanyName
+                                        <br />
+                                        <small class="text-muted">@result.Industry</small>
+                                    </td>
+                                    <td><span class="badge bg-secondary">@result.Sector</span></td>
+                                    <td class="text-end fw-bold">$@result.Price.ToString("F2")</td>
+                                    <td class="text-end">
+                                        <span class="@(result.ChangePercent >= 0 ? "text-success" : "text-danger") fw-bold">
+                                            @result.ChangePercentFormatted
+                                        </span>
+                                    </td>
+                                    <td class="text-end">@result.VolumeFormatted</td>
+                                    <td class="text-end">@result.MarketCapFormatted</td>
+                                    <td class="text-end">@(result.PE > 0 ? result.PE.ToString("F2") : "N/A")</td>
+                                    <td class="text-end">@(result.EPS != 0 ? $"${result.EPS:F2}" : "N/A")</td>
+                                    <td class="text-end">@(result.DividendYield > 0 ? $"{result.DividendYield:F2}%" : "-")</td>
+                                    <td class="text-end">@(result.Beta > 0 ? result.Beta.ToString("F2") : "N/A")</td>
+                                    <td class="text-end">$@result.FiftyTwoWeekHigh.ToString("F2")</td>
+                                    <td class="text-end">$@result.FiftyTwoWeekLow.ToString("F2")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+    else if (hasSearched && !isLoading)
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>
+            No stocks found matching your criteria. Try adjusting your filters or add custom symbols.
+        </div>
+    }
+
+    @* API Rate Limit Notice *@
+    <div class="alert alert-warning mt-4">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        <strong>Note:</strong> Alpha Vantage free tier is limited to 25 API calls/day. 
+        For full functionality, consider upgrading to a premium plan or running the screener with fewer symbols.
+    </div>
+</div>
+
+@code {
+    private StockScreenerFilters filters = new();
+    private List<ScreenerResult> screenerResults = [];
+    private List<SymbolMatch> searchResults = [];
+    private TopGainersLosersResponse? topGainersLosers;
+
+    private bool isLoading;
+    private bool isSearching;
+    private bool showFilters = true;
+    private bool hasSearched;
+    private string searchKeyword = string.Empty;
+    private string customSymbolsInput = string.Empty;
+    private long selectedMinVolume;
+    private string currentSortProperty = string.Empty;
+    private bool sortAscending = true;
+
+    private void ToggleFilters() => showFilters = !showFilters;
+
+    private async Task RunScreener()
+    {
+        Logger.LogInformation("RunScreener button clicked!");
+        isLoading = true;
+        hasSearched = true;
+        StateHasChanged();
+
+        try
+        {
+            filters.MinVolume = selectedMinVolume > 0 ? selectedMinVolume : null;
+
+            List<string>? customSymbols = null;
+            if (!string.IsNullOrWhiteSpace(customSymbolsInput))
+            {
+                customSymbols = customSymbolsInput
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    .Select(s => s.ToUpperInvariant())
+                    .ToList();
+                Logger.LogInformation("Custom symbols: {Symbols}", string.Join(", ", customSymbols));
+            }
+
+            Logger.LogInformation("Calling AlphaVantage.ScreenStocksAsync...");
+            screenerResults = await AlphaVantage.ScreenStocksAsync(filters, customSymbols);
+            Logger.LogInformation("ScreenStocksAsync returned {Count} results", screenerResults.Count);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error in RunScreener");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandleSearchKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await SearchSymbols();
+        }
+    }
+
+    private async Task SearchSymbols()
+    {
+        if (string.IsNullOrWhiteSpace(searchKeyword)) return;
+
+        isSearching = true;
+        StateHasChanged();
+
+        try
+        {
+            searchResults = await AlphaVantage.SearchSymbolsAsync(searchKeyword);
+        }
+        finally
+        {
+            isSearching = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadTopGainersLosers()
+    {
+        isLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            topGainersLosers = await AlphaVantage.GetTopGainersLosersAsync();
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void AddToCustomSymbols(string symbol)
+    {
+        if (string.IsNullOrWhiteSpace(customSymbolsInput))
+        {
+            customSymbolsInput = symbol;
+        }
+        else if (!customSymbolsInput.Contains(symbol, StringComparison.OrdinalIgnoreCase))
+        {
+            customSymbolsInput += $", {symbol}";
+        }
+    }
+
+    private void ClearCustomSymbols() => customSymbolsInput = string.Empty;
+
+    private void ResetFilters()
+    {
+        filters = new StockScreenerFilters();
+        selectedMinVolume = 0;
+        customSymbolsInput = string.Empty;
+        screenerResults.Clear();
+        hasSearched = false;
+    }
+
+    private void SortResults(string propertyName)
+    {
+        if (currentSortProperty == propertyName)
+        {
+            sortAscending = !sortAscending;
+        }
+        else
+        {
+            currentSortProperty = propertyName;
+            sortAscending = false; // Default to descending for numbers
+        }
+
+        screenerResults = propertyName switch
+        {
+            nameof(ScreenerResult.Symbol) => sortAscending 
+                ? screenerResults.OrderBy(r => r.Symbol).ToList() 
+                : screenerResults.OrderByDescending(r => r.Symbol).ToList(),
+            nameof(ScreenerResult.Price) => sortAscending 
+                ? screenerResults.OrderBy(r => r.Price).ToList() 
+                : screenerResults.OrderByDescending(r => r.Price).ToList(),
+            nameof(ScreenerResult.ChangePercent) => sortAscending 
+                ? screenerResults.OrderBy(r => r.ChangePercent).ToList() 
+                : screenerResults.OrderByDescending(r => r.ChangePercent).ToList(),
+            nameof(ScreenerResult.Volume) => sortAscending 
+                ? screenerResults.OrderBy(r => r.Volume).ToList() 
+                : screenerResults.OrderByDescending(r => r.Volume).ToList(),
+            nameof(ScreenerResult.MarketCap) => sortAscending 
+                ? screenerResults.OrderBy(r => r.MarketCap).ToList() 
+                : screenerResults.OrderByDescending(r => r.MarketCap).ToList(),
+            nameof(ScreenerResult.PE) => sortAscending 
+                ? screenerResults.OrderBy(r => r.PE).ToList() 
+                : screenerResults.OrderByDescending(r => r.PE).ToList(),
+            _ => screenerResults
+        };
+    }
+
+    private static string FormatVolume(long volume)
+    {
+        return volume switch
+        {
+            >= 1_000_000_000 => $"{volume / 1_000_000_000.0:F2}B",
+            >= 1_000_000 => $"{volume / 1_000_000.0:F2}M",
+            >= 1_000 => $"{volume / 1_000.0:F2}K",
+            _ => volume.ToString()
+        };
+    }
+}
