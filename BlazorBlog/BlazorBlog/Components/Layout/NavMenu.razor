@@ -2,101 +2,55 @@
 
 @inject NavigationManager NavigationManager
 
-<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">BlazorBlog</a>
-    </div>
-</div>
-
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
-
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="nav flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="blog">
-                <span class="bi bi-journal-text-nav-menu" aria-hidden="true"></span> Blog
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-	        <NavLink class="nav-link" href="weather">
-		        <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-	        </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="stock-screener-alphav-antage">
-                <span class="bi bi-graph-up-arrow-nav-menu" aria-hidden="true"></span> Stock Screener
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="stock-screener-massive">
-                <span class="bi bi-graph-up-nav-menu" aria-hidden="true"></span> Stock Screener (Massive)
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="auth">
-                <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> Auth Required
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="travel">
-                <span class="bi bi-airplane-nav-menu" aria-hidden="true"></span> Travel
-            </NavLink>
-        </div>
-
-        <AuthorizeView>
-            <Authorized>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="Account/Manage">
-                        <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> @context.User.Identity?.Name
-                    </NavLink>
-                </div>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="admin/setup">
-                        <span class="bi bi-gear-nav-menu" aria-hidden="true"></span> Admin Setup
-                    </NavLink>
-                </div>
-                <div class="nav-item px-3">
-                    <form action="Account/Logout" method="post">
-                        <AntiforgeryToken />
-                        <input type="hidden" name="ReturnUrl" value="@currentUrl" />
-                        <button type="submit" class="nav-link">
-                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
-                        </button>
-                    </form>
-                </div>
-            </Authorized>
-            <NotAuthorized>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="Account/Register">
-                        <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Register
-                    </NavLink>
-                </div>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="Account/Login">
-                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Login
-                    </NavLink>
-                </div>
-            </NotAuthorized>
-        </AuthorizeView>
-    </nav>
-</div>
+<ul id="mobilemenu">
+	<li><NavLink href="" Match="NavLinkMatch.All">Home</NavLink></li>
+	<li class="menu-item-has-children"><a href="#">Blog</a>
+		<ul class="sub-menu">
+			<li><NavLink href="blog">All Posts</NavLink></li>
+			<li><NavLink href="counter">Counter</NavLink></li>
+			<li><NavLink href="weather">Weather</NavLink></li>
+		</ul>
+	</li>
+	<li class="menu-item-has-children"><a href="#">Stock</a>
+		<ul class="sub-menu">
+			<li><NavLink href="stock-screener-alphav-antage">Stock Screener</NavLink></li>
+			<li><NavLink href="stock-screener-massive">Stock Screener (Massive)</NavLink></li>
+		</ul>
+	</li>
+	<li class="menu-item-has-children"><a href="#">Travel</a>
+		<ul class="sub-menu">
+			<li><NavLink href="travel">All Travel</NavLink></li>
+			<li><NavLink href="travel/americas">Americas</NavLink></li>
+			<li><NavLink href="travel/asia">Asia</NavLink></li>
+		</ul>
+	</li>
+	<AuthorizeView>
+		<Authorized>
+			<li class="menu-item-has-children"><a href="#">@context.User.Identity?.Name</a>
+				<ul class="sub-menu">
+					<li><NavLink href="Account/Manage">Profile</NavLink></li>
+					<li><NavLink href="admin/setup">Admin Setup</NavLink></li>
+					<li>
+						<form action="Account/Logout" method="post">
+							<AntiforgeryToken />
+							<input type="hidden" name="ReturnUrl" value="@currentUrl" />
+							<button type="submit" class="nav-logout-btn">Logout</button>
+						</form>
+					</li>
+				</ul>
+			</li>
+		</Authorized>
+		<NotAuthorized>
+			<li class="menu-item-has-children"><a href="#">Account</a>
+				<ul class="sub-menu">
+					<li><NavLink href="Account/Register">Register</NavLink></li>
+					<li><NavLink href="Account/Login">Login</NavLink></li>
+				</ul>
+			</li>
+		</NotAuthorized>
+	</AuthorizeView>
+	<li><NavLink href="auth">Auth Required</NavLink></li>
+</ul>
 
 @code {
     private string? currentUrl;

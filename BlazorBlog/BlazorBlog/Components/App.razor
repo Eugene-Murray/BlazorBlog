@@ -4,19 +4,59 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="BlazorBlog - Portfolio HTML5 Template" />
     <base href="/" />
     <ResourcePreloader />
-    <link rel="stylesheet" href="@Assets["lib/bootstrap/dist/css/bootstrap.min.css"]" />
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="@Assets["theme-metierhtml/main-file/assets/css/bootstrap.min.css"]" />
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="@Assets["theme-metierhtml/main-file/assets/css/all.css"]" />
+    <!-- Animate CSS -->
+    <link rel="stylesheet" href="@Assets["theme-metierhtml/main-file/assets/css/animate.css"]" />
+    <!-- Swiper -->
+    <link rel="stylesheet" href="@Assets["theme-metierhtml/main-file/assets/css/swiper-bundle.min.css"]" />
+    <!-- Magnific -->
+    <link rel="stylesheet" href="@Assets["theme-metierhtml/main-file/assets/css/magnific-popup.css"]" />
+    <!-- Mean menu -->
+    <link rel="stylesheet" href="@Assets["theme-metierhtml/main-file/assets/css/meanmenu.min.css"]" />
+    <!-- Custom Theme CSS -->
+    <link rel="stylesheet" href="@Assets["theme-metierhtml/main-file/assets/sass/style.css"]" />
+    <!-- App CSS -->
     <link rel="stylesheet" href="@Assets["app.css"]" />
     <link rel="stylesheet" href="@Assets["BlazorBlog.styles.css"]" />
     <ImportMap />
-    <link rel="icon" type="image/png" href="favicon.png" />
     <HeadOutlet />
 </head>
 
 <body>
     <Routes />
     <ReconnectModal />
+
+    <!-- Main JS -->
+    <script src="@Assets["theme-metierhtml/main-file/assets/js/jquery-3.6.0.min.js"]"></script>
+    <!-- Bootstrap JS -->
+    <script src="@Assets["theme-metierhtml/main-file/assets/js/bootstrap.min.js"]"></script>
+    <!-- Counter up -->
+    <script src="@Assets["theme-metierhtml/main-file/assets/js/jquery.counterup.min.js"]"></script>
+    <!-- Popper JS -->
+    <script src="@Assets["theme-metierhtml/main-file/assets/js/popper.min.js"]"></script>
+    <!-- Progressbar JS -->
+    <script src="@Assets["theme-metierhtml/main-file/assets/js/progressbar.min.js"]"></script>
+    <!-- Magnific JS -->
+    <script src="@Assets["theme-metierhtml/main-file/assets/js/jquery.magnific-popup.min.js"]"></script>
+    <!-- Swiper JS -->
+    <script src="@Assets["theme-metierhtml/main-file/assets/js/swiper-bundle.min.js"]"></script>
+    <!-- Waypoints JS -->
+    <script src="@Assets["theme-metierhtml/main-file/assets/js/jquery.waypoints.min.js"]"></script>
+    <!-- Isotope JS -->
+    <script src="@Assets["theme-metierhtml/main-file/assets/js/isotope.pkgd.min.js"]"></script>
+    <!-- Mean menu -->
+    <script src="@Assets["theme-metierhtml/main-file/assets/js/jquery.meanmenu.min.js"]"></script>
+    <!-- Custom JS -->
+    <script src="@Assets["theme-metierhtml/main-file/assets/js/custom.js"]"></script>
+    <!-- Blazor JS -->
     <script src="@Assets["_framework/blazor.web.js"]"></script>
     <script src="@Assets["Components/Account/Shared/PasskeySubmit.razor.js"]" type="module"></script>
 </body>
