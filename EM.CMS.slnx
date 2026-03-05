@@ -5,6 +5,9 @@
   <Folder Name="/Test/">
     <Project Path="UnitTestExamples/UnitTestExamples.csproj" Id="9c1a2981-4406-4d2e-898e-7d4a9636ba76" />
   </Folder>
+  <Folder Name="/TradingAlgos/">
+    <Project Path="TradingAlgos/TradingAlgos.csproj" Id="feb3c3fa-f6a1-4344-b1d3-6c001d289dca" />
+  </Folder>
   <Folder Name="/UI/">
     <Project Path="BlazorExperiments.AppHost/BlazorExperiments.AppHost.csproj" />
     <Project Path="BlazorExperiments.ServiceDefaults/BlazorExperiments.ServiceDefaults.csproj" />
