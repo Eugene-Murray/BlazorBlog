@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using EM.CMS.API.Data;
 using EM.CMS.API.Endpoints;
+using EM.CMS.API.Models;
+using EM.CMS.API.Models.UserManagement;
 using EM.CMS.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,14 +18,18 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
 // Add Identity API endpoints for SPA authentication
-builder.Services.AddIdentityApiEndpoints<IdentityUser>()
+builder.Services.AddIdentityApiEndpoints<ApplicationUser>()
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
 builder.Services.AddAuthorization();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Register services
 builder.Services.AddScoped<IWeatherForecastService, WeatherForecastService>();
+builder.Services.AddScoped<IUserManagementService, UserManagementService>();
 
 builder.Services.AddCors(options =>
 {
@@ -53,10 +59,12 @@ app.UseHttpsRedirection();
 app.UseCors("AngularApp");
 
 // Map Identity API endpoints for registration, login, etc.
-app.MapIdentityApi<IdentityUser>();
+app.MapIdentityApi<ApplicationUser>();
 
 // Map feature endpoints
 app.MapAuthEndpoints();
 app.MapWeatherForecastEndpoints();
+app.MapUserManagementEndpoints();
+app.MapRoleManagementEndpoints();
 
 app.Run();
