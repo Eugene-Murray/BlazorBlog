@@ -25,6 +25,17 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IWeatherForecastService, WeatherForecastService>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AngularApp", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200") // Angular dev server
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -39,18 +50,13 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AngularApp");
 
 // Map Identity API endpoints for registration, login, etc.
 app.MapIdentityApi<IdentityUser>();
 
-// Add logout endpoint
-app.MapPost("/logout", async (SignInManager<IdentityUser> signInManager) =>
-{
-    await signInManager.SignOutAsync();
-    return Results.Ok();
-}).RequireAuthorization();
-
 // Map feature endpoints
+app.MapAuthEndpoints();
 app.MapWeatherForecastEndpoints();
 
-    app.Run();
+app.Run();
