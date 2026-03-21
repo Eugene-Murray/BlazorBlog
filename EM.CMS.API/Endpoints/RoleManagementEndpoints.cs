@@ -7,15 +7,17 @@ namespace EM.CMS.API.Endpoints;
 
 public static class RoleManagementEndpoints
 {
-    public static void MapRoleManagementEndpoints(this WebApplication app)
+    public static IEndpointRouteBuilder MapRoleManagementEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/api/roles")
+        var group = app.MapGroup("/roles")
             .WithTags("Role Management")
             .RequireAuthorization();
 
         group.MapGet("/", GetAllRoles).WithName("GetAllRoles");
         group.MapPost("/", CreateRole).WithName("CreateRole");
         group.MapDelete("/{roleId}", DeleteRole).WithName("DeleteRole");
+
+        return app;
     }
 
     private static async Task<Ok<IEnumerable<RoleDto>>> GetAllRoles(IUserManagementService service)

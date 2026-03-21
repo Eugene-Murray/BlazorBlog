@@ -81,14 +81,18 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("AngularApp");
+app.UseAuthorization();
+
+// Map all API endpoints under /api prefix
+var api = app.MapGroup("api");
 
 // Map Identity API endpoints for registration, login, etc.
-app.MapIdentityApi<ApplicationUser>();
+api.MapIdentityApi<ApplicationUser>();
 
 // Map feature endpoints
-app.MapAuthEndpoints();
-app.MapWeatherForecastEndpoints();
-app.MapUserManagementEndpoints();
-app.MapRoleManagementEndpoints();
+api.MapAuthEndpoints();
+api.MapWeatherForecastEndpoints();
+api.MapUserManagementEndpoints();
+api.MapRoleManagementEndpoints();
 
 app.Run();

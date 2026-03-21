@@ -7,9 +7,9 @@ namespace EM.CMS.API.Endpoints;
 
 public static class UserManagementEndpoints
 {
-    public static void MapUserManagementEndpoints(this WebApplication app)
+    public static IEndpointRouteBuilder MapUserManagementEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/api/users")
+        var group = app.MapGroup("/users")
             .WithTags("User Management")
             .RequireAuthorization();
 
@@ -35,6 +35,8 @@ public static class UserManagementEndpoints
         // Logins endpoints
         group.MapGet("/{userId}/logins", GetUserLogins).WithName("GetUserLogins");
         group.MapDelete("/{userId}/logins/{loginProvider}/{providerKey}", RemoveUserLogin).WithName("RemoveUserLogin");
+
+        return app;
     }
 
     #region User Handlers
