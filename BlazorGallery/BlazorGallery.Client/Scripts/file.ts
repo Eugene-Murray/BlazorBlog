@@ -1,1 +1,0 @@
-﻿console.warn("log warn bla bla");
