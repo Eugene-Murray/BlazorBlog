@@ -163,7 +163,7 @@
     {
         if (role == null) return;
 
-        bool? result = await DialogService.ShowMessageBox(
+        bool? result = await DialogService.ShowMessageBoxAsync(
             "Confirm Delete",
             $"Are you sure you want to remove claim '{claim.Type}: {claim.Value}'?",
             yesText: "Delete", cancelText: "Cancel");

@@ -94,7 +94,7 @@
 
     private async Task DeleteRole(IdentityRole role)
     {
-        bool? result = await DialogService.ShowMessageBox(
+        bool? result = await DialogService.ShowMessageBoxAsync(
             "Confirm Delete",
             $"Are you sure you want to delete role '{role.Name}'?",
             yesText: "Delete", cancelText: "Cancel");

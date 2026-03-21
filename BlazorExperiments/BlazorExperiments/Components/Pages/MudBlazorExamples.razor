@@ -278,7 +278,7 @@
 
     private async Task OpenDialog()
     {
-        bool? result = await DialogService.ShowMessageBox(
+        bool? result = await DialogService.ShowMessageBoxAsync(
             "Simple Dialog",
             "This is a simple dialog example. You can add any content here.",
             yesText:"Ok", cancelText:"Cancel");
