@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/API/">
+    <Project Path="EM.CMS.Auth.SQLite.API/EM.CMS.Auth.SQLite.API.csproj" />
     <Project Path="EM.CMS.Auth.SqlServer.API/EM.CMS.Auth.SqlServer.API.csproj" Id="2cb14fa5-792e-4069-8b2a-6b8328997045" />
     <Project Path="EM.CMS.GrpcService/EM.CMS.GrpcService.csproj" />
     <Project Path="EM.CMS.TokenAuthApi/EM.CMS.TokenAuthApi.csproj" />

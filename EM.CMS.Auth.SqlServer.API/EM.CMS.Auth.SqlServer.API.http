@@ -1,0 +1,6 @@
+@EM.CMS.API_HostAddress = http://localhost:5263
+
+GET {{EM.CMS.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
