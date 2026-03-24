@@ -1,4 +1,12 @@
 <Solution>
+  <Folder Name="/API/">
+    <Project Path="EM.CMS.API/EM.CMS.API.csproj" Id="2cb14fa5-792e-4069-8b2a-6b8328997045" />
+    <Project Path="EM.CMS.GrpcService/EM.CMS.GrpcService.csproj" />
+    <Project Path="EM.CMS.TokenAuthApi/EM.CMS.TokenAuthApi.csproj" />
+  </Folder>
+  <Folder Name="/Console/">
+    <Project Path="ConsoleExperimentsApp/ConsoleExperimentsApp.csproj" Id="f5ef4d5c-65ff-42bc-9c09-b4e49670607f" />
+  </Folder>
   <Folder Name="/Settings/">
     <File Path="Directory.Packages.props" />
   </Folder>
@@ -9,20 +17,16 @@
     <Project Path="TradingAlgos/TradingAlgos.csproj" Id="feb3c3fa-f6a1-4344-b1d3-6c001d289dca" />
   </Folder>
   <Folder Name="/UI/">
+    <Project Path="BlazorBlog/BlazorBlog.Client/BlazorBlog.Client.csproj" />
+    <Project Path="BlazorBlog/BlazorBlog/BlazorBlog.csproj" />
     <Project Path="BlazorExperiments.AppHost/BlazorExperiments.AppHost.csproj" />
     <Project Path="BlazorExperiments.ServiceDefaults/BlazorExperiments.ServiceDefaults.csproj" />
     <Project Path="BlazorExperiments/BlazorExperiments.Client/BlazorExperiments.Client.csproj" />
     <Project Path="BlazorExperiments/BlazorExperiments/BlazorExperiments.csproj" />
-    <Project Path="BlazorBlog/BlazorBlog.Client/BlazorBlog.Client.csproj" />
-    <Project Path="BlazorBlog/BlazorBlog/BlazorBlog.csproj" />
     <Project Path="BlazorGallery/BlazorGallery.Client/BlazorGallery.Client.csproj" />
     <Project Path="BlazorGallery/BlazorGallery/BlazorGallery.csproj" />
     <Project Path="BlazorGames/BlazorGames.Client/BlazorGames.Client.csproj" />
     <Project Path="BlazorGames/BlazorGames/BlazorGames.csproj" />
-    <Project Path="ConsoleExperimentsApp/ConsoleExperimentsApp.csproj" Id="f5ef4d5c-65ff-42bc-9c09-b4e49670607f" />
-    <Project Path="EM.CMS.API/EM.CMS.API.csproj" Id="2cb14fa5-792e-4069-8b2a-6b8328997045" />
-    <Project Path="EM.CMS.GrpcService/EM.CMS.GrpcService.csproj" />
-    <Project Path="EM.CMS.TokenAuthApi/EM.CMS.TokenAuthApi.csproj" />
   </Folder>
   <Project Path="EM.CMS.Application/EM.CMS.Application.csproj" />
   <Project Path="EM.CMS.Common/EM.CMS.Common.csproj" />
