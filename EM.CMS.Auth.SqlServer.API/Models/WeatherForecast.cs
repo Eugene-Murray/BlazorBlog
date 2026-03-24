@@ -1,4 +1,4 @@
-namespace EM.CMS.API.Models;
+namespace EM.CMS.Auth.SqlServer.API.Models;
 
 public record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {

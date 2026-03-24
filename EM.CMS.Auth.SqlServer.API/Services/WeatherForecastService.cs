@@ -1,6 +1,6 @@
-using EM.CMS.API.Models;
+using EM.CMS.Auth.SqlServer.API.Models;
 
-namespace EM.CMS.API.Services;
+namespace EM.CMS.Auth.SqlServer.API.Services;
 
 public class WeatherForecastService : IWeatherForecastService
 {

@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
-using EM.CMS.API.Data;
-using EM.CMS.API.Endpoints;
-using EM.CMS.API.Models;
-using EM.CMS.API.Models.UserManagement;
-using EM.CMS.API.Services;
+using EM.CMS.Auth.SqlServer.API.Data;
+using EM.CMS.Auth.SqlServer.API.Endpoints;
+using EM.CMS.Auth.SqlServer.API.Models;
+using EM.CMS.Auth.SqlServer.API.Models.UserManagement;
+using EM.CMS.Auth.SqlServer.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

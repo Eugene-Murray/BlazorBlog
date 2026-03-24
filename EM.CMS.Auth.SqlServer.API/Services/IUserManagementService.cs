@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Identity;
-using EM.CMS.API.Models.UserManagement;
+using EM.CMS.Auth.SqlServer.API.Models.UserManagement;
 
-namespace EM.CMS.API.Services;
+namespace EM.CMS.Auth.SqlServer.API.Services;
 
 public interface IUserManagementService
 {

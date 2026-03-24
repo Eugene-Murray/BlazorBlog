@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
-using EM.CMS.API.Models.UserManagement;
-using EM.CMS.API.Services;
+using EM.CMS.Auth.SqlServer.API.Models.UserManagement;
+using EM.CMS.Auth.SqlServer.API.Services;
 
-namespace EM.CMS.API.Endpoints;
+namespace EM.CMS.Auth.SqlServer.API.Endpoints;
 
 public static class UserManagementEndpoints
 {

@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace EM.CMS.API.Endpoints;
+namespace EM.CMS.Auth.SqlServer.API.Endpoints;
 
 public static class AuthEndpoints
 {

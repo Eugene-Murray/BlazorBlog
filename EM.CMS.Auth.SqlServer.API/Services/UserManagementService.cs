@@ -1,11 +1,11 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using EM.CMS.API.Data;
-using EM.CMS.API.Models;
-using EM.CMS.API.Models.UserManagement;
+using EM.CMS.Auth.SqlServer.API.Data;
+using EM.CMS.Auth.SqlServer.API.Models;
+using EM.CMS.Auth.SqlServer.API.Models.UserManagement;
 
-namespace EM.CMS.API.Services;
+namespace EM.CMS.Auth.SqlServer.API.Services;
 
 public class UserManagementService : IUserManagementService
 {

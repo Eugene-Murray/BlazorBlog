@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace EM.CMS.API.Models.UserManagement
+namespace EM.CMS.Auth.SqlServer.API.Models.UserManagement
 {
     public class ApplicationUser : IdentityUser
     {

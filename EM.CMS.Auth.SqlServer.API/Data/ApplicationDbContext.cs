@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using EM.CMS.API.Models;
-using EM.CMS.API.Models.UserManagement;
+using EM.CMS.Auth.SqlServer.API.Models;
+using EM.CMS.Auth.SqlServer.API.Models.UserManagement;
 
-namespace EM.CMS.API.Data;
+namespace EM.CMS.Auth.SqlServer.API.Data;
 
 public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 {

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace EM.CMS.API.Data.Migrations
+namespace EM.CMS.Auth.SqlServer.API.Data.Migrations
 {
     /// <inheritdoc />
     public partial class InitialIdentitySchema : Migration

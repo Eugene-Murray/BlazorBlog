@@ -1,7 +1,7 @@
-using EM.CMS.API.Models;
-using EM.CMS.API.Services;
+using EM.CMS.Auth.SqlServer.API.Models;
+using EM.CMS.Auth.SqlServer.API.Services;
 
-namespace EM.CMS.API.Endpoints;
+namespace EM.CMS.Auth.SqlServer.API.Endpoints;
 
 public static class WeatherForecastEndpoints
 {
